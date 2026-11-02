@@ -14,6 +14,7 @@ defmodule AshAdmin.Resource.Field do
     :max_file_size,
     :accepted_extensions,
     :datetime_step,
+    :resource,
     :__spark_metadata__
   ]
 
@@ -46,6 +47,12 @@ defmodule AshAdmin.Resource.Field do
       required: false,
       doc:
         "The value for the input's `step` property that determines it's precision. Defaults to \"60\", i.e. minute. Only applicable to action attributes and arguments that are datetimes, e.g. `Ash.Type.UtcDatetime`."
+    ],
+    resource: [
+      type: :module,
+      required: false,
+      doc:
+        "The resource that an action argument references, e.g. `MyApp.Organization` for an `organization_id` argument. The argument renders as a relationship select or typeahead field instead of a text input. Only applicable to action arguments. The referenced resource needs a `label_field`."
     ]
   ]
 

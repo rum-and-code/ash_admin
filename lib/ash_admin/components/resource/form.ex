@@ -2745,6 +2745,15 @@ defmodule AshAdmin.Components.Resource.Form do
             end
           end
 
+        %Ash.Resource.Actions.Argument{name: name} = argument ->
+          case AshAdmin.Resource.field(resource, name) do
+            %{resource: destination} when not is_nil(destination) ->
+              Map.put(argument, :related_resource, destination)
+
+            _ ->
+              argument
+          end
+
         attribute ->
           attribute
       end)
