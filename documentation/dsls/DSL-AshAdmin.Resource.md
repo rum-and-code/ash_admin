@@ -42,6 +42,7 @@ Configure the admin dashboard for a given resource.
 | [`show_calculations`](#admin-show_calculations){: #admin-show_calculations } | `list(atom)` |  | A list of calculations that can be loaded when this resource is shown. By default, no calculations are included. |
 | [`label_field`](#admin-label_field){: #admin-label_field } | `atom` |  | The field to use as the label when the resource appears in a relationship select or typeahead field on another resource's form. |
 | [`relationship_select_max_items`](#admin-relationship_select_max_items){: #admin-relationship_select_max_items } | `integer` | `50` | The maximum number of items to show in a select field when this resource is shown as a relationship on another resource's form. If the number of related resources is higher, a typeahead selector will be used. |
+| [`link_relationships?`](#admin-link_relationships?){: #admin-link_relationships? } | `boolean` | `true` | Whether `belongs_to` foreign key attributes (e.g. `user_id`) are rendered as links to the related record's show page. |
 
 
 ### admin.form
