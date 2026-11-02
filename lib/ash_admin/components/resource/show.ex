@@ -23,6 +23,8 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :table, :any, required: true
   attr :prefix, :any, required: true
 
+  @value_box_class "mt-1 block w-full min-h-[2.375rem] px-3 py-2 rounded-md border shadow-sm sm:text-sm break-words border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+
   def render(assigns) do
     ~H"""
     <div class="md:pt-10 sm:mt-0">
@@ -120,9 +122,42 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
+  # Submits the calculation form from an icon at the end of the value box.
+  defp calculate_button(assigns) do
+    ~H"""
+    <button
+      type="submit"
+      title={@label}
+      aria-label={@label}
+      data-calculate
+      class="flex-none rounded text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+      style="padding: 0.125rem; margin: -0.125rem 0;"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="h-4 w-4"
+      >
+        <rect x="4" y="2" width="12" height="16" rx="2" stroke-width="1.5" />
+        <path d="M7 5.75h6" stroke-width="1.5" />
+        <path
+          d="M7.5 9.5h.01M10 9.5h.01M12.5 9.5h.01M7.5 12h.01M10 12h.01M12.5 12h.01M7.5 14.5h.01M10 14.5h.01M12.5 14.5h.01"
+          stroke-width="2"
+        />
+      </svg>
+    </button>
+    """
+  end
+
   @spec render_calculations(any(), any(), any()) :: Phoenix.LiveView.Rendered.t()
   def render_calculations(assigns, record, resource) do
-    assigns = assign(assigns, record: record, resource: resource)
+    assigns =
+      assign(assigns, record: record, resource: resource, value_box_class: @value_box_class)
 
     ~H"""
     <div class="grid grid-cols-6 gap-6">
@@ -152,17 +187,21 @@ defmodule AshAdmin.Components.Resource.Show do
               form
             )}
           </div>
-          <div class="flex items-start gap-2">
-            <div :if={loaded?(@record, calculation.name)} class="flex-1 min-w-0">
-              {render_field_value(assigns, @resource, @record, calculation)}
-            </div>
-            <button
-              :if={!loaded?(@record, calculation.name) || calculation.arguments != []}
-              type="submit"
-              class="mt-1 inline-flex shrink-0 justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-            >
-              {if loaded?(@record, calculation.name), do: "Recalculate", else: "Calculate"}
-            </button>
+          <div
+            :if={!loaded?(@record, calculation.name)}
+            class={classes([@value_box_class, "flex items-center justify-end"])}
+          >
+            {calculate_button(%{label: "Calculate"})}
+          </div>
+          <div :if={loaded?(@record, calculation.name)}>
+            {render_field_value(
+              assigns,
+              @resource,
+              @record,
+              calculation,
+              nil,
+              calculation.arguments != [] && calculate_button(%{label: "Recalculate"})
+            )}
           </div>
           <.error :if={@calculation_errors[calculation.name]}>
             {error_message(@calculation_errors[calculation.name])}
@@ -422,7 +461,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(attribute.name)}
         </div>
-        {render_field_value(assigns, @resource, @record, attribute, @relationship_name)}
+        {render_field_value(assigns, @resource, @record, attribute, @relationship_name, nil)}
       </div>
     </div>
     <div :if={!Enum.empty?(@flags)} class="hidden sm:block" aria-hidden="true">
@@ -444,7 +483,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(attribute.name)}
         </div>
-        {render_field_value(assigns, @resource, @record, attribute, @relationship_name)}
+        {render_field_value(assigns, @resource, @record, attribute, @relationship_name, nil)}
       </div>
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="hidden sm:block" aria-hidden="true">
@@ -467,7 +506,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(attribute.name)}
         </div>
-        {render_field_value(assigns, @resource, @record, attribute, @relationship_name)}
+        {render_field_value(assigns, @resource, @record, attribute, @relationship_name, nil)}
       </div>
     </div>
     """
@@ -475,9 +514,19 @@ defmodule AshAdmin.Components.Resource.Show do
 
   # Renders a field's value. Scalar values sit in a read-only box styled like an
   # input; structured values (maps, embedded resources) keep their own layout.
-  defp render_field_value(assigns, resource, record, attribute, relationship_name \\ nil) do
+  # `button`, when given, is rendered at the end of the value.
+  defp render_field_value(
+         assigns,
+         resource,
+         record,
+         attribute,
+         relationship_name,
+         button
+       ) do
     assigns =
       assign(assigns,
+        field_button: button || nil,
+        value_box_class: @value_box_class,
         field_resource: resource,
         field_record: record,
         field_attribute: attribute,
@@ -492,19 +541,32 @@ defmodule AshAdmin.Components.Resource.Show do
       data-field={@field_attribute.name}
       class={
         classes([
-          "mt-1 block w-full min-h-[2.375rem] px-3 py-2 rounded-md border shadow-sm sm:text-sm break-words",
-          "border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
+          @value_box_class,
+          "flex items-start justify-between gap-2": @field_button,
           "whitespace-pre-wrap min-h-[5rem]": @long
         ])
       }
     >
-      {render_maybe_sensitive_attribute(
-        assigns,
-        @field_resource,
-        @field_record,
-        @field_attribute,
-        @field_relationship_name
-      )}
+      <%= if @field_button do %>
+        <span class="min-w-0">
+          {render_maybe_sensitive_attribute(
+            assigns,
+            @field_resource,
+            @field_record,
+            @field_attribute,
+            @field_relationship_name
+          )}
+        </span>
+        {@field_button}
+      <% else %>
+        {render_maybe_sensitive_attribute(
+          assigns,
+          @field_resource,
+          @field_record,
+          @field_attribute,
+          @field_relationship_name
+        )}
+      <% end %>
     </div>
     <div :if={!@boxed}>
       {render_maybe_sensitive_attribute(
@@ -514,6 +576,7 @@ defmodule AshAdmin.Components.Resource.Show do
         @field_attribute,
         @field_relationship_name
       )}
+      {@field_button}
     </div>
     """
   end
