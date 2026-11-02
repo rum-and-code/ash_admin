@@ -2684,10 +2684,6 @@ select {
   overflow: hidden;
 }
 
-.overflow-scroll {
-  overflow: scroll;
-}
-
 .overflow-x-auto {
   overflow-x: auto;
 }
@@ -5839,5 +5835,29 @@ main.admin-main::after {
     border-bottom-right-radius: 0.5rem;
     border-bottom-left-radius: 0.5rem;
   }
+}
+
+.\[\&_table\]\:m-0 table {
+  margin: 0px;
+}
+
+.\[\&_table\]\:w-full table {
+  width: 100%;
+}
+
+.\[\&_td\]\:whitespace-nowrap td {
+  white-space: nowrap;
+}
+
+.\[\&_td\]\:pr-6 td {
+  padding-right: 1.5rem;
+}
+
+.\[\&_th\]\:whitespace-nowrap th {
+  white-space: nowrap;
+}
+
+.\[\&_th\]\:pr-6 th {
+  padding-right: 1.5rem;
 }
 
