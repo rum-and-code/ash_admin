@@ -79,7 +79,7 @@ defmodule AshAdmin.Test.Components.Resource.RelationshipLinksTest do
     end
   end
 
-  test "the show page of a comment links to its post" do
+  test "the show page of a comment has a button to its post" do
     post = Ash.create!(Post, %{body: "A post"})
     comment = Ash.create!(Comment, %{body: "A comment", post_id: post.id})
 
@@ -93,7 +93,8 @@ defmodule AshAdmin.Test.Components.Resource.RelationshipLinksTest do
 
     {:ok, view, _html} = live(build_conn(), path)
 
-    assert has_element?(view, ~s|a[href="#{post_path(post)}"]|, post.id)
+    assert render(view) =~ post.id
+    assert has_element?(view, ~s|a[data-relationship-link][href="#{post_path(post)}"]|)
   end
 
   test "a table of comments links to their post" do

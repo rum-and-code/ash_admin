@@ -742,7 +742,7 @@ defmodule AshAdmin.Components.Resource.Show do
             resource
             |> AshAdmin.Resource.format_fields()
             |> FormatHelper.format_attribute(record, attribute)
-            |> maybe_link(
+            |> with_relationship_button(
               relationship_path(
                 assigns[:prefix],
                 resource,
@@ -753,6 +753,46 @@ defmodule AshAdmin.Components.Resource.Show do
         end
       end
     end
+  end
+
+  # Puts a button at the end of the value that opens the related record.
+  defp with_relationship_button(value, nil), do: value
+
+  defp with_relationship_button(value, path) do
+    assigns = %{value: value, path: path}
+
+    ~H"""
+    <span class="flex items-center justify-between gap-2">
+      <span class="min-w-0">{@value}</span>
+      <.link
+        navigate={@path}
+        title="Open the related record"
+        aria-label="Open the related record"
+        data-relationship-link
+        class="flex-none rounded text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+        style="padding: 0.125rem; margin: -0.125rem 0;"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+          class="h-4 w-4"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Z"
+            clip-rule="evenodd"
+          />
+          <path
+            fill-rule="evenodd"
+            d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </.link>
+    </span>
+    """
   end
 
   def handle_event("validate-calculation", %{"calculation" => calculation_name} = params, socket) do
