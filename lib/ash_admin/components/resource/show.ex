@@ -376,7 +376,8 @@ defmodule AshAdmin.Components.Resource.Show do
       )
 
     ~H"""
-    <div class="mb-10 overflow-scroll">
+    <%!-- Keep each value on one line and scroll sideways instead of squeezing the columns. --%>
+    <div class="overflow-x-auto [&_table]:m-0 [&_table]:w-full [&_th]:whitespace-nowrap [&_th]:pr-6 [&_td]:whitespace-nowrap [&_td]:pr-6">
       <Table.table
         data={@data}
         resource={@destination}
