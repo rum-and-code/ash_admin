@@ -79,6 +79,7 @@ Declare non-default behavior for a specific attribute.
 | [`max_file_size`](#admin-form-field-max_file_size){: #admin-form-field-max_file_size } | `integer` |  | The maximum file size in bytes to allow to be uploaded. Only applicable to action arguments of `Ash.Type.File`. |
 | [`accepted_extensions`](#admin-form-field-accepted_extensions){: #admin-form-field-accepted_extensions } | `any \| list(String.t)` |  | A list of unique file extensions (such as ".jpeg") or mime type (such as "image/jpeg" or "image/*"). Only applicable to action arguments of `Ash.Type.File`. |
 | [`datetime_step`](#admin-form-field-datetime_step){: #admin-form-field-datetime_step } | `String.t` |  | The value for the input's `step` property that determines it's precision. Defaults to "60", i.e. minute. Only applicable to action attributes and arguments that are datetimes, e.g. `Ash.Type.UtcDatetime`. |
+| [`resource`](#admin-form-field-resource){: #admin-form-field-resource } | `module` |  | The resource that an action argument references, e.g. `MyApp.Organization` for an `organization_id` argument. The argument renders as a relationship select or typeahead field instead of a text input. Only applicable to action arguments. The referenced resource needs a `label_field`. |
 
 
 

@@ -140,7 +140,8 @@ defmodule AshAdmin.Resource do
       AshAdmin.Resource.Transformers.AddPositionSortCalculation
     ],
     verifiers: [
-      AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist
+      AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist,
+      AshAdmin.Resource.Verifiers.VerifyFieldResources
     ]
 
   @moduledoc """
