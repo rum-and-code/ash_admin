@@ -84,6 +84,7 @@ if config_env() == :test do
   config :ash_admin,
     ash_domains: [
       AshAdmin.Test.Domain,
-      AshAdmin.Test.ManyToManyDomain
+      AshAdmin.Test.ManyToManyDomain,
+      AshAdmin.Test.ShowDomain
     ]
 end

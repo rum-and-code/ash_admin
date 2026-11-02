@@ -28,12 +28,7 @@ defmodule AshAdmin.Components.Resource.Show do
     <div class="md:pt-10 sm:mt-0">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          {render_show(assigns, @record, @resource)}
-        </div>
-      </div>
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
-        <div class="mt-5 md:mt-0 md:col-span-2">
-          {render_calculations(assigns, @record, @resource)}
+          {render_show(assigns, @record, @resource, nil, true, true)}
         </div>
       </div>
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
@@ -45,8 +40,22 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
-  def render_show(assigns, record, resource, title \\ nil, buttons? \\ true) do
-    assigns = assign(assigns, record: record, resource: resource, title: title, buttons: buttons?)
+  def render_show(
+        assigns,
+        record,
+        resource,
+        title \\ nil,
+        buttons? \\ true,
+        calculations? \\ false
+      ) do
+    assigns =
+      assign(assigns,
+        record: record,
+        resource: resource,
+        title: title,
+        buttons: buttons?,
+        show_calculations: calculations? && assigns[:calculations] not in [nil, []]
+      )
 
     ~H"""
     <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
@@ -64,6 +73,14 @@ defmodule AshAdmin.Components.Resource.Show do
       <div class="px-4 py-5 sm:p-6">
         <div>
           {render_attributes(assigns, @record, @resource)}
+          <div :if={@show_calculations}>
+            <div class="hidden sm:block" aria-hidden="true">
+              <div class="py-5">
+                <div class="border-t border-slate-200 dark:border-slate-700" />
+              </div>
+            </div>
+            {render_calculations(assigns, @record, @resource)}
+          </div>
           <div :if={@buttons} class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={destroy?(@resource)}
@@ -108,94 +125,141 @@ defmodule AshAdmin.Components.Resource.Show do
     assigns = assign(assigns, record: record, resource: resource)
 
     ~H"""
-    <div
-      :for={{calculation, calculation_form} <- @calculations}
-      class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md mb-2 bg-white dark:bg-slate-900"
-    >
-      <div class="px-4 py-5 mt-2">
-        <div>{to_name(calculation.name)}</div>
-        <div :if={loaded?(@record, calculation.name)}>
-          {render_maybe_sensitive_attribute(
-            assigns,
-            @resource,
-            @record,
-            calculation
-          )}
+    <div class="grid grid-cols-6 gap-6">
+      <div
+        :for={{calculation, calculation_form} <- @calculations}
+        id={"calculation-#{calculation.name}"}
+        class="col-span-6 sm:col-span-3"
+      >
+        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          {to_name(calculation.name)}
         </div>
-        <div>
-          <.form
-            :let={form}
-            as={calculation.name}
-            for={calculation_form}
-            phx-change="validate-calculation"
-            phx-submit="calculate"
-            phx-target={@myself}
-          >
-            <.input type="hidden" name="calculation" value={calculation.name} />
+        <.form
+          :let={form}
+          id={"calculation-form-#{calculation.name}"}
+          as={calculation.name}
+          for={calculation_form}
+          phx-change="validate-calculation"
+          phx-submit="calculate"
+          phx-target={@myself}
+        >
+          <.input type="hidden" name="calculation" value={calculation.name} />
+          <div :if={calculation.arguments != []} class="mb-2">
             {AshAdmin.Components.Resource.Form.render_attributes(
               assigns,
               @resource,
               calculation,
               form
             )}
-            <.error :if={is_exception(@calculation_errors[calculation.name])}>
-              {Exception.message(@calculation_errors[calculation.name])}
-            </.error>
-            <.error :if={
-              @calculation_errors[calculation.name] &&
-                !is_exception(@calculation_errors[calculation.name])
-            }>
-              {inspect(@calculation_errors[calculation.name])}
-            </.error>
-            <div class="px-4 py-3 text-right sm:px-6">
-              <button
-                type="submit"
-                class="py-2 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-700 dark:hover:bg-slate-300 rounded-md justify-center items-center"
-              >
-                Calculate
-              </button>
+          </div>
+          <div class="flex items-start gap-2">
+            <div :if={loaded?(@record, calculation.name)} class="flex-1 min-w-0">
+              {render_field_value(assigns, @resource, @record, calculation)}
             </div>
-          </.form>
-        </div>
+            <button
+              :if={!loaded?(@record, calculation.name) || calculation.arguments != []}
+              type="submit"
+              class="mt-1 inline-flex shrink-0 justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+            >
+              {if loaded?(@record, calculation.name), do: "Recalculate", else: "Calculate"}
+            </button>
+          </div>
+          <.error :if={@calculation_errors[calculation.name]}>
+            {error_message(@calculation_errors[calculation.name])}
+          </.error>
+        </.form>
       </div>
     </div>
     """
   end
 
-  defp render_relationships(assigns, _record, resource) do
-    assigns = assign(assigns, resource: resource)
+  defp render_relationships(assigns, record, resource) do
+    relationships = AshAdmin.Components.Resource.Form.relationships(resource, :show)
+
+    active =
+      Enum.find(relationships, &(&1.name == assigns[:active_relationship])) ||
+        List.first(relationships)
+
+    assigns =
+      assign(assigns,
+        record: record,
+        resource: resource,
+        relationships: relationships,
+        active: active
+      )
 
     ~H"""
-    <div
-      :for={relationship <- AshAdmin.Components.Resource.Form.relationships(@resource, :show)}
-      class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md mb-2 bg-white dark:bg-slate-900"
-    >
-      <div class="px-4 py-5 mt-2">
-        <div>
-          {to_name(relationship.name)}
+    <div :if={@active}>
+      <div class="flex justify-center mb-4">
+        <nav
+          role="tablist"
+          class="inline-flex flex-wrap gap-1 p-1 rounded-lg shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 bg-white dark:bg-slate-900"
+        >
           <button
-            :if={!loaded?(@record, relationship.name)}
+            :for={relationship <- @relationships}
+            id={"relationship-tab-#{relationship.name}"}
+            type="button"
+            role="tab"
+            aria-selected={to_string(relationship.name == @active.name)}
+            phx-click="select_relationship"
+            phx-value-relationship={relationship.name}
+            phx-target={@myself}
+            class={
+              classes([
+                "px-3 py-1.5 text-sm font-medium rounded-md",
+                "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100":
+                  relationship.name == @active.name,
+                "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200":
+                  relationship.name != @active.name
+              ])
+            }
+          >
+            {to_name(relationship.name)}
+          </button>
+        </nav>
+      </div>
+      <div
+        id={"relationship-panel-#{@active.name}"}
+        role="tabpanel"
+        class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900"
+      >
+        <div class="flex items-center justify-between gap-4 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+          <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+            {to_name(@active.name)}
+          </h2>
+          <button
+            :if={!loaded?(@record, @active.name)}
             phx-click="load"
             phx-target={@myself}
-            phx-value-relationship={relationship.name}
+            phx-value-relationship={@active.name}
             type="button"
-            class="flex py-2 ml-4 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-700 dark:hover:bg-slate-300 rounded-md justify-center items-center"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
           >
             Load
           </button>
           <button
-            :if={loaded?(@record, relationship.name) && relationship.cardinality == :many}
+            :if={loaded?(@record, @active.name) && @active.cardinality == :many}
             phx-click="unload"
             phx-target={@myself}
-            phx-value-relationship={relationship.name}
+            phx-value-relationship={@active.name}
             type="button"
-            class="flex py-2 ml-4 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-700 dark:hover:bg-slate-300 rounded-md justify-center items-center"
+            class="inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
           >
             Unload
           </button>
-
-          <div :if={loaded?(@record, relationship.name)}>
-            {render_relationship_data(assigns, @record, relationship)}
+        </div>
+        <div class="px-4 py-5">
+          <.error :if={@load_errors[@active.name]}>
+            {error_message(@load_errors[@active.name])}
+          </.error>
+          <p
+            :if={!loaded?(@record, @active.name) && !@load_errors[@active.name]}
+            class="text-sm text-slate-500 dark:text-slate-400"
+          >
+            Not loaded.
+          </p>
+          <div :if={loaded?(@record, @active.name)}>
+            {render_relationship_data(assigns, @record, @active)}
           </div>
         </div>
       </div>
@@ -208,6 +272,7 @@ defmodule AshAdmin.Components.Resource.Show do
       socket
       |> assign_new(:load_errors, fn -> %{} end)
       |> assign_new(:calculation_errors, fn -> %{} end)
+      |> assign_new(:active_relationship, fn -> nil end)
 
     {:ok, assign}
   end
@@ -356,15 +421,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(attribute.name)}
         </div>
-        <div>
-          {render_maybe_sensitive_attribute(
-            assigns,
-            @resource,
-            @record,
-            attribute,
-            @relationship_name
-          )}
-        </div>
+        {render_field_value(assigns, @resource, @record, attribute, @relationship_name)}
       </div>
     </div>
     <div :if={!Enum.empty?(@flags)} class="hidden sm:block" aria-hidden="true">
@@ -386,15 +443,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(attribute.name)}
         </div>
-        <div>
-          {render_maybe_sensitive_attribute(
-            assigns,
-            @resource,
-            @record,
-            attribute,
-            @relationship_name
-          )}
-        </div>
+        {render_field_value(assigns, @resource, @record, attribute, @relationship_name)}
       </div>
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="hidden sm:block" aria-hidden="true">
@@ -417,26 +466,95 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(attribute.name)}
         </div>
-        <div>
-          {render_maybe_sensitive_attribute(
-            assigns,
-            @resource,
-            @record,
-            attribute,
-            @relationship_name
-          )}
-        </div>
+        {render_field_value(assigns, @resource, @record, attribute, @relationship_name)}
       </div>
     </div>
     """
   end
+
+  # Renders a field's value. Scalar values sit in a read-only box styled like an
+  # input; structured values (maps, embedded resources) keep their own layout.
+  defp render_field_value(assigns, resource, record, attribute, relationship_name \\ nil) do
+    assigns =
+      assign(assigns,
+        field_resource: resource,
+        field_record: record,
+        field_attribute: attribute,
+        field_relationship_name: relationship_name,
+        boxed: boxed?(attribute),
+        long: long_text?(resource, attribute)
+      )
+
+    ~H"""
+    <div
+      :if={@boxed}
+      data-field={@field_attribute.name}
+      class={
+        classes([
+          "mt-1 block w-full min-h-[2.375rem] px-3 py-2 rounded-md border shadow-sm sm:text-sm break-words",
+          "border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
+          "whitespace-pre-wrap min-h-[5rem]": @long
+        ])
+      }
+    >
+      {render_maybe_sensitive_attribute(
+        assigns,
+        @field_resource,
+        @field_record,
+        @field_attribute,
+        @field_relationship_name
+      )}
+    </div>
+    <div :if={!@boxed}>
+      {render_maybe_sensitive_attribute(
+        assigns,
+        @field_resource,
+        @field_record,
+        @field_attribute,
+        @field_relationship_name
+      )}
+    </div>
+    """
+  end
+
+  defp boxed?(%{type: type} = attribute),
+    do: boxed_type?(type, Map.get(attribute, :constraints) || [])
+
+  defp boxed_type?({:array, type}, constraints), do: boxed_type?(type, constraints[:items] || [])
+
+  defp boxed_type?(Ash.Type.Union, constraints) do
+    Enum.all?(constraints[:types] || [], fn {_name, config} ->
+      boxed_type?(config[:type], config[:constraints] || [])
+    end)
+  end
+
+  defp boxed_type?(type, _constraints) when type in [Ash.Type.Map, Ash.Type.Struct], do: false
+
+  defp boxed_type?(type, constraints) do
+    cond do
+      Ash.Type.NewType.new_type?(type) ->
+        boxed_type?(
+          Ash.Type.NewType.subtype_of(type),
+          Ash.Type.NewType.constraints(type, constraints)
+        )
+
+      Ash.Type.embedded_type?(type) ->
+        false
+
+      true ->
+        true
+    end
+  end
+
+  defp error_message(error) when is_exception(error), do: Exception.message(error)
+  defp error_message(error), do: inspect(error)
 
   defp render_maybe_sensitive_attribute(
          assigns,
          resource,
          record,
          attribute,
-         relationship_name \\ nil
+         relationship_name
        ) do
     assigns = assign(assigns, attribute: attribute, relationship_name: relationship_name)
     show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(resource)
@@ -454,6 +572,30 @@ defmodule AshAdmin.Components.Resource.Show do
     else
       render_attribute(assigns, resource, record, attribute, relationship_name)
     end
+  end
+
+  # Scalar array items, rendered inline and separated by commas.
+  defp inline_items(assigns) do
+    item_attribute = %{
+      assigns.attribute
+      | type: assigns.type,
+        constraints: assigns.attribute.constraints[:items] || []
+    }
+
+    assigns.record
+    |> Map.get(assigns.name)
+    |> List.wrap()
+    |> Enum.map(fn value ->
+      render_attribute(
+        assigns,
+        assigns.resource,
+        Map.put(assigns.record, assigns.name, value),
+        item_attribute,
+        assigns.relationship_name,
+        true
+      )
+    end)
+    |> Enum.intersperse(", ")
   end
 
   defp render_attribute(assigns, resource, record, attribute, relationship_name, nested? \\ false)
@@ -481,23 +623,12 @@ defmodule AshAdmin.Components.Resource.Show do
         )
 
       ~H"""
-      <%= if @nested do %>
-        <ul>
-          <li :for={value <- List.wrap(Map.get(@record, @name))} class="mb-4 pb-4 shadow-md">
-            {render_attribute(
-              assigns,
-              @resource,
-              Map.put(@record, @name, value),
-              %{@attribute | type: @type},
-              @relationship_name,
-              true
-            )}
-          </li>
-        </ul>
+      <%= if boxed?(@attribute) do %>
+        <span :for={item <- inline_items(assigns)}>{item}</span>
       <% else %>
-        <div class="shadow-md border mt-4 mb-4 ml-4">
+        <%= if @nested do %>
           <ul>
-            <li :for={value <- List.wrap(Map.get(@record, @name))} class="my-4 mb-4 pb-4 shadow-md">
+            <li :for={value <- List.wrap(Map.get(@record, @name))} class="mb-4 pb-4 shadow-md">
               {render_attribute(
                 assigns,
                 @resource,
@@ -508,7 +639,22 @@ defmodule AshAdmin.Components.Resource.Show do
               )}
             </li>
           </ul>
-        </div>
+        <% else %>
+          <div class="shadow-md border mt-4 mb-4 ml-4">
+            <ul>
+              <li :for={value <- List.wrap(Map.get(@record, @name))} class="my-4 mb-4 pb-4 shadow-md">
+                {render_attribute(
+                  assigns,
+                  @resource,
+                  Map.put(@record, @name, value),
+                  %{@attribute | type: @type},
+                  @relationship_name,
+                  true
+                )}
+              </li>
+            </ul>
+          </div>
+        <% end %>
       <% end %>
       """
     end
@@ -703,40 +849,9 @@ defmodule AshAdmin.Components.Resource.Show do
           """
         end
       else
-        assigns =
-          assign(assigns,
-            resource: resource,
-            record: record,
-            attribute: attribute,
-            nested: nested?
-          )
-
         case attribute.type do
           Ash.Type.String ->
-            cond do
-              short_text?(resource, attribute) ->
-                value!(Map.get(record, attribute.name))
-
-              long_text?(resource, attribute) ->
-                ~H"""
-                <textarea
-                  rows="3"
-                  cols="40"
-                  disabled
-                  class="resize-y mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
-                ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
-                """
-
-              true ->
-                ~H"""
-                <textarea
-                  rows="1"
-                  cols="20"
-                  disabled
-                  class="resize-y mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
-                ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
-                """
-            end
+            value!(Map.get(record, attribute.name))
 
           _ ->
             resource
@@ -812,7 +927,11 @@ defmodule AshAdmin.Components.Resource.Show do
              authorize?: socket.assigns[:authorizing]
            ) do
         {:ok, loaded} ->
-          {:noreply, assign(socket, record: loaded)}
+          {:noreply,
+           assign(socket,
+             record: loaded,
+             calculation_errors: Map.delete(socket.assigns.calculation_errors, calculation.name)
+           )}
 
         {:error, errors} ->
           {:noreply,
@@ -839,7 +958,11 @@ defmodule AshAdmin.Components.Resource.Show do
            authorize?: socket.assigns[:authorizing]
          ) do
       {:ok, loaded} ->
-        {:noreply, assign(socket, record: loaded)}
+        {:noreply,
+         assign(socket,
+           record: loaded,
+           load_errors: Map.delete(socket.assigns.load_errors, relationship)
+         )}
 
       {:error, errors} ->
         {:noreply,
@@ -847,11 +970,27 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
+  def handle_event("select_relationship", %{"relationship" => relationship}, socket) do
+    # Match against the declared relationships so a client-supplied name never
+    # mints a new atom.
+    selected =
+      socket.assigns.resource
+      |> AshAdmin.Components.Resource.Form.relationships(:show)
+      |> Enum.find(&(to_string(&1.name) == relationship))
+
+    if selected do
+      {:noreply, assign(socket, active_relationship: selected.name)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_event("unload", %{"relationship" => relationship}, socket) do
     record = socket.assigns.record
     relationship = String.to_existing_atom(relationship)
 
-    unloaded = Map.put(record, relationship, Map.get(record.__struct__.__struct__, relationship))
+    unloaded =
+      Map.put(record, relationship, Map.get(record.__struct__.__struct__(), relationship))
 
     {:noreply, assign(socket, record: unloaded)}
   end
