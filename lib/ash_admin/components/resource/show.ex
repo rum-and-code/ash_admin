@@ -743,6 +743,14 @@ defmodule AshAdmin.Components.Resource.Show do
             resource
             |> AshAdmin.Resource.format_fields()
             |> FormatHelper.format_attribute(record, attribute)
+            |> maybe_link(
+              relationship_path(
+                assigns[:prefix],
+                resource,
+                attribute.name,
+                Map.get(record, attribute.name)
+              )
+            )
         end
       end
     end

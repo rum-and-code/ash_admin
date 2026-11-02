@@ -50,7 +50,8 @@ defmodule AshAdmin.Components.Resource.Table do
                 @format_fields,
                 @show_sensitive_fields,
                 [actor: @actor, tenant: @tenant, authorize?: @authorizing],
-                @relationship_name
+                @relationship_name,
+                @prefix
               )}
             </td>
             <td :if={@actions && actions?(@resource)}>
@@ -146,7 +147,8 @@ defmodule AshAdmin.Components.Resource.Table do
         formats,
         show_sensitive_fields,
         load_opts,
-        relationship_name
+        relationship_name,
+        prefix \\ nil
       ) do
     process_attribute(
       domain,
@@ -155,7 +157,8 @@ defmodule AshAdmin.Components.Resource.Table do
       formats,
       show_sensitive_fields,
       load_opts,
-      relationship_name
+      relationship_name,
+      prefix
     )
   rescue
     _ ->
@@ -169,7 +172,8 @@ defmodule AshAdmin.Components.Resource.Table do
          formats,
          show_sensitive_fields,
          load_opts,
-         relationship_name
+         relationship_name,
+         _prefix
        )
        when module in [HasOne, BelongsTo] do
     display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
@@ -217,7 +221,8 @@ defmodule AshAdmin.Components.Resource.Table do
          formats,
          show_sensitive_fields,
          _load_opts,
-         relationship_name
+         relationship_name,
+         prefix
        )
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
     data = FormatHelper.format_attribute(formats, record, attribute)
@@ -226,7 +231,9 @@ defmodule AshAdmin.Components.Resource.Table do
          not Enum.member?(show_sensitive_fields, attribute.name) do
       format_sensitive_value(data, attribute, record, relationship_name)
     else
-      format_attribute_value(data, attribute)
+      data
+      |> format_attribute_value(attribute)
+      |> maybe_link(attribute_link(prefix, record, attribute))
     end
   end
 
@@ -237,10 +244,17 @@ defmodule AshAdmin.Components.Resource.Table do
          _formats,
          _show_sensitive_fields,
          _load_opts,
-         _relationship_name
+         _relationship_name,
+         _prefix
        ) do
     "..."
   end
+
+  defp attribute_link(prefix, %resource{} = record, %Ash.Resource.Attribute{} = attribute) do
+    relationship_path(prefix, resource, attribute.name, Map.get(record, attribute.name))
+  end
+
+  defp attribute_link(_prefix, _record, _attribute), do: nil
 
   defp format_sensitive_value(value, attribute, record, relationship_name) do
     assigns = %{

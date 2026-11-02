@@ -55,6 +55,50 @@ defmodule AshAdmin.Helpers do
     prefix <> "?" <> query
   end
 
+  @doc """
+  Returns the admin show path of the record referenced by a `belongs_to`
+  foreign key attribute, or `nil` when no link should be rendered.
+  """
+  def relationship_path(prefix, _resource, _attribute_name, value)
+      when is_nil(prefix) or is_nil(value),
+      do: nil
+
+  def relationship_path(prefix, resource, attribute_name, value) do
+    with true <- AshAdmin.Resource.link_relationships?(resource),
+         %{} = relationship <- belongs_to_for(resource, attribute_name),
+         destination = relationship.destination,
+         true <-
+           [relationship.destination_attribute] == Ash.Resource.Info.primary_key(destination),
+         true <- simple_type?(destination, relationship.destination_attribute),
+         domain = relationship.domain || Ash.Resource.Info.domain(destination),
+         true <- visible_resource?(domain, destination) do
+      admin_path(prefix,
+        domain: AshAdmin.Domain.name(domain),
+        resource: AshAdmin.Resource.name(destination),
+        primary_key: value,
+        action_type: "read"
+      )
+    else
+      _ -> nil
+    end
+  end
+
+  defp belongs_to_for(resource, attribute_name) do
+    resource
+    |> Ash.Resource.Info.relationships()
+    |> Enum.find(fn relationship ->
+      relationship.type == :belongs_to and relationship.source_attribute == attribute_name
+    end)
+  end
+
+  defp visible_resource?(nil, _resource), do: false
+
+  defp visible_resource?(domain, resource) do
+    AshAdmin.Domain in Spark.extensions(domain) and AshAdmin.Domain.show?(domain) and
+      resource in AshAdmin.Domain.show_resources(domain) and
+      not is_nil(AshAdmin.Resource.show_action(resource))
+  end
+
   def to_name(:id), do: "ID"
 
   def to_name(%{__struct__: Ash.Resource.Attribute, related_resource: resource} = attribute)
