@@ -33,3 +33,10 @@ ash_admin-*.tar
 
 # Ignore assets
 /priv/static/assets/*
+
+/.nix-mix/
+/.nix-hex/
+
+# direnv
+/.direnv/
+/.envrc
