@@ -21,7 +21,7 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   set :controls_class, "border-b border-slate-200 dark:border-white/10"
   set :table_wrapper_class, "overflow-x-auto"
   set :table_class, "w-full text-left text-sm tabular-nums"
-  set :thead_class, "border-b border-slate-200 dark:border-white/10"
+  set :thead_class, "border-b border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/[0.03]"
   set :header_row_class, ""
 
   set :th_class,

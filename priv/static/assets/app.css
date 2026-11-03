@@ -5949,6 +5949,10 @@ main.admin-main::after {
     background-color: rgb(255 255 255 / 0.02);
   }
 
+  .dark\:bg-white\/\[0\.03\] {
+    background-color: rgb(255 255 255 / 0.03);
+  }
+
   .dark\:text-blue-200 {
     --tw-text-opacity: 1;
     color: rgb(191 219 254 / var(--tw-text-opacity));
