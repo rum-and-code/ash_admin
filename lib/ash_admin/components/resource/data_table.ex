@@ -106,6 +106,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   label={to_name(field_name)}
                   filter={filterable?(@resource, field_name)}
                   sort={sortable?(@resource, field_name)}
+                  search={searchable?(@resource, field_name)}
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
@@ -532,6 +533,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
       nil -> true
       list -> field_name in list && has_attribute?(resource, field_name)
     end
+  end
+
+  # Check if a field is searched by the table search box
+  defp searchable?(resource, field_name) do
+    field_name in AshAdmin.Resource.table_searchable_columns(resource)
   end
 
   # Check if field is an actual resource attribute (not a relationship or calculated field)
