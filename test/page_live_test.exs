@@ -191,6 +191,8 @@ defmodule AshAdmin.Test.PageLiveTest do
       assert has_element?(view, "#{@crumb} li:last-child span", "Read")
       assert has_element?(view, "main h1", "Post")
       assert has_element?(view, "main a, main button", "New")
+      # A single read action needs no switcher: the breadcrumb links to the list.
+      refute has_element?(view, "main a", ~r/^\s*Read\s*$/)
     end
 
     test "the create page shows the resource and the action", %{conn: conn} do
