@@ -25,8 +25,10 @@ module.exports = {
     extend: {
       colors: {
         brand: "#FD4F00",
-        // Accent for active nav items, primary buttons, current page and focus.
-        primary: colors.blue,
+      },
+      fontFamily: {
+        // shadcn preset font. Inter is used when installed; no web font is loaded (CSP, inlined CSS).
+        sans: ["Inter", "InterVariable", ...require("tailwindcss/defaultTheme").fontFamily.sans],
       },
     },
   },

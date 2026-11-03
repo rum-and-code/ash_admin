@@ -86,23 +86,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
         >
           <div class="aa-card overflow-auto">
             <div>
-              <div
-                :if={@ash_query && @has_filters}
-                class="flex justify-end px-6 py-3 border-b border-slate-200 dark:border-white/10"
-              >
-                <button
-                  phx-click="toggle_filters"
-                  phx-target={@myself}
-                  aria-pressed={to_string(@show_filters)}
-                  class="aa-btn-secondary"
-                >
-                  <AshAdmin.CoreComponents.icon
-                    name={if @show_filters, do: "hero-funnel-solid", else: "hero-funnel"}
-                    class="h-4 w-4"
-                  />
-                  {if @show_filters, do: "Hide Filters", else: "Filters"}
-                </button>
-              </div>
               <Cinder.collection
                 :if={@ash_query}
                 query={@ash_query}
@@ -110,7 +93,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 tenant={@tenant}
                 page_size={@page_size}
                 pagination={@pagination_mode}
-                show_filters={@show_filters}
+                show_filters={true}
                 query_opts={[authorize?: @authorizing]}
                 theme={AshAdminTheme}
                 click={row_click(assigns)}
@@ -185,7 +168,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
     <div class="relative flex justify-end" phx-click={JS.toggle(to: "##{@id}")}>
       <button
         type="button"
-        class="rounded-md p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
+        class="rounded-md p-1 text-neutral-400 hover:bg-neutral-200/60 hover:text-neutral-700 dark:hover:bg-white/10 dark:hover:text-neutral-200"
         title="Actions"
         aria-label="Actions"
       >
@@ -229,12 +212,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
         </button>
         <div
           :if={@destroy_actions != []}
-          class="my-1 border-t border-slate-100 dark:border-white/5"
+          class="-mx-1 my-1 border-t border-neutral-200 dark:border-white/10"
         />
         <.link
           :for={action <- @destroy_actions}
           navigate={record_path(assigns, @record, :destroy, action)}
-          class="block px-3 py-1.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+          class="block w-full rounded-md px-2 py-1.5 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-600/10 dark:hover:bg-red-400/10"
         >
           {action_label(action)}
         </.link>
@@ -251,8 +234,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
     {:ok,
      socket
      |> assign_new(:initialized, fn -> false end)
-     |> assign_new(:default, fn -> nil end)
-     |> assign_new(:show_filters, fn -> false end)}
+     |> assign_new(:default, fn -> nil end)}
   end
 
   def update(assigns, socket) do
@@ -309,13 +291,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
       {page_size, pagination_mode} = pagination_config(socket.assigns.action)
 
-      has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
-
       socket =
         assign(socket,
           page_size: page_size,
-          pagination_mode: pagination_mode,
-          has_filters: has_filters
+          pagination_mode: pagination_mode
         )
 
       {:ok,
@@ -347,10 +326,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
         {page_size, pagination_mode}
     end
-  end
-
-  def handle_event("toggle_filters", _params, socket) do
-    {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
   end
 
   def handle_event("validate", %{"query" => query}, socket) do

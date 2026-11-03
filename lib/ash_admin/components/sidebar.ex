@@ -15,6 +15,7 @@ defmodule AshAdmin.Components.Sidebar do
   attr :host_app_path, :string, default: nil
   attr :host_app_label, :string, default: nil
   attr :open, :boolean, default: false
+  attr :initial_expanded_domains, :any, default: nil
 
   # Actor/auth/tenant assigns
   attr :actor, :any, default: nil
@@ -33,11 +34,11 @@ defmodule AshAdmin.Components.Sidebar do
 
   def render(assigns) do
     ~H"""
-    <div id={@id} class="relative md:flex md:w-64 md:shrink-0">
+    <div id={@id} phx-hook="SidebarState" class="relative md:flex md:w-64 md:shrink-0">
       <%!-- Mobile sidebar --%>
       <aside class={[
         "fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-200 ease-in-out md:hidden",
-        "bg-white dark:bg-slate-900 flex flex-col shadow-xl",
+        "bg-white dark:bg-neutral-900 flex flex-col shadow-xl",
         if(@open, do: "translate-x-0", else: "-translate-x-full")
       ]}>
         {render_sidebar_content(Map.put(assigns, :variant, :mobile))}
@@ -45,7 +46,7 @@ defmodule AshAdmin.Components.Sidebar do
 
       <div class="hidden md:flex md:w-64 md:shrink-0">
         <%!-- Desktop sidebar --%>
-        <aside class="flex flex-col w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200/70 dark:border-white/5 overflow-y-auto">
+        <aside class="flex flex-col w-64 bg-neutral-50 dark:bg-neutral-900 border-r border-neutral-200 dark:border-white/10 overflow-y-auto">
           {render_sidebar_content(Map.put(assigns, :variant, :desktop))}
         </aside>
       </div>
@@ -59,14 +60,14 @@ defmodule AshAdmin.Components.Sidebar do
     <div class="flex min-h-[4rem] shrink-0 flex-col justify-center gap-1 px-6 py-4">
       <.link
         navigate={@prefix}
-        class="text-xl font-bold tracking-tight text-slate-950 dark:text-white"
+        class="text-xl font-bold tracking-tight text-neutral-950 dark:text-white"
       >
         {AshAdmin.title()}
       </.link>
       <.link
         :if={@host_app_path}
         href={@host_app_path}
-        class="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+        class="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors"
       >
         <AshAdmin.CoreComponents.icon name="hero-arrow-left-mini" class="h-4 w-4" />
         {@host_app_label}
@@ -82,7 +83,7 @@ defmodule AshAdmin.Components.Sidebar do
           phx-value-domain={AshAdmin.Domain.name(domain)}
           phx-target={@myself}
           aria-expanded={to_string(domain_expanded?(@expanded_domains, domain))}
-          class="w-full flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+          class="w-full flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
         >
           <span>{AshAdmin.Domain.name(domain)}</span>
           <AshAdmin.CoreComponents.icon
@@ -91,7 +92,7 @@ defmodule AshAdmin.Components.Sidebar do
                 do: "hero-chevron-up-mini",
                 else: "hero-chevron-down-mini"
             }
-            class="h-4 w-4 text-slate-400 dark:text-slate-500"
+            class="h-4 w-4 text-neutral-400 dark:text-neutral-500"
           />
         </button>
 
@@ -101,7 +102,7 @@ defmodule AshAdmin.Components.Sidebar do
           <div :for={{group, group_index} <- Enum.with_index(groups)}>
             <div
               :if={group_label(group, group_index, group_labels)}
-              class="px-3 pt-3 pb-1 text-xs font-medium text-slate-400 dark:text-slate-500"
+              class="px-3 pt-3 pb-1 text-xs font-medium text-neutral-400 dark:text-neutral-500"
             >
               {group_label(group, group_index, group_labels)}
             </div>
@@ -110,11 +111,12 @@ defmodule AshAdmin.Components.Sidebar do
               navigate={item.to}
               aria-current={item.active && "page"}
               class={[
-                "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "flex h-8 items-center rounded-md px-3 text-sm transition-colors",
                 if(item.active,
-                  do: "bg-slate-200/60 text-primary-600 dark:bg-white/5 dark:text-primary-400",
+                  do:
+                    "bg-neutral-200/50 font-medium text-neutral-900 dark:bg-white/10 dark:text-white",
                   else:
-                    "text-slate-700 hover:bg-slate-200/40 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+                    "text-neutral-700 hover:bg-neutral-200/50 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
                 )
               ]}
             >
@@ -126,7 +128,7 @@ defmodule AshAdmin.Components.Sidebar do
     </nav>
 
     <%!-- Status Panel --%>
-    <div class="border-t border-slate-200/70 dark:border-white/5 px-6 py-4 space-y-3">
+    <div class="border-t border-neutral-200 dark:border-white/10 px-6 py-4 space-y-3">
       <%!-- Actor --%>
       <div
         :if={@actor_resources != []}
@@ -135,7 +137,7 @@ defmodule AshAdmin.Components.Sidebar do
         class="space-y-1.5"
       >
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Actor</span>
+          <span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Actor</span>
         </div>
         <div :if={@actor} class="flex items-center gap-2 text-sm">
           <button
@@ -150,27 +152,30 @@ defmodule AshAdmin.Components.Sidebar do
           >
             <span class={[
               "inline-block h-2.5 w-2.5 rounded-full transition-colors",
-              if(@actor_paused, do: "bg-slate-400", else: "bg-emerald-500")
+              if(@actor_paused, do: "bg-neutral-400", else: "bg-emerald-500")
             ]} />
           </button>
-          <span class="text-slate-700 dark:text-slate-300 truncate" title={user_display(@actor, @actor_tenant)}>
+          <span
+            class="text-neutral-700 dark:text-neutral-300 truncate"
+            title={user_display(@actor, @actor_tenant)}
+          >
             {user_display(@actor, @actor_tenant)}
           </span>
           <button
             type="button"
             phx-click="clear_actor"
-            class="flex-shrink-0 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            class="flex-shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
             title="Clear actor"
           >
             <AshAdmin.CoreComponents.icon name="hero-x-mark-mini" class="h-4 w-4" />
           </button>
         </div>
-        <div :if={!@actor} class="text-sm text-slate-500">
+        <div :if={!@actor} class="text-sm text-neutral-500">
           <span>No actor</span>
           <span :for={{domain, resource} <- @actor_resources} class="ml-1">
             <.link
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
-              class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+              class="font-medium text-neutral-900 underline underline-offset-4 hover:text-neutral-600 dark:text-white dark:hover:text-neutral-300"
             >
               Set {AshAdmin.Resource.name(resource)}
             </.link>
@@ -187,9 +192,11 @@ defmodule AshAdmin.Components.Sidebar do
         >
           <span class={[
             "inline-block h-2.5 w-2.5 rounded-full transition-colors",
-            if(@authorizing, do: "bg-emerald-500", else: "bg-slate-400")
+            if(@authorizing, do: "bg-emerald-500", else: "bg-neutral-400")
           ]} />
-          <span class={if(@authorizing, do: "text-slate-700 dark:text-slate-300", else: "text-slate-500")}>
+          <span class={
+            if(@authorizing, do: "text-neutral-700 dark:text-neutral-300", else: "text-neutral-500")
+          }>
             {if @authorizing, do: "Auth enforced", else: "Auth bypassed"}
           </span>
         </button>
@@ -203,7 +210,7 @@ defmodule AshAdmin.Components.Sidebar do
         class="relative"
       >
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Tenant</span>
+          <span class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Tenant</span>
         </div>
         {render_tenant(assigns)}
       </div>
@@ -271,7 +278,7 @@ defmodule AshAdmin.Components.Sidebar do
               phx-click={
                 Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-typeahead-form-#{@variant}")
               }
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary-600"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />
             </button>
@@ -279,14 +286,18 @@ defmodule AshAdmin.Components.Sidebar do
         </.form>
       </div>
       <div :if={!@editing_tenant} class="flex items-center gap-2 text-sm">
-        <a href="#" phx-click="start_editing_tenant" class="text-slate-700 hover:text-primary-600 dark:text-slate-300 dark:hover:text-primary-400">
+        <a
+          href="#"
+          phx-click="start_editing_tenant"
+          class="text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
+        >
           {tenant_display(assigns)}
         </a>
         <button
           :if={@tenant}
           type="button"
           phx-click="clear_tenant"
-          class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+          class="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
         >
           <AshAdmin.CoreComponents.icon name="hero-x-mark-mini" class="h-4 w-4" />
         </button>
@@ -310,7 +321,7 @@ defmodule AshAdmin.Components.Sidebar do
             <button
               type="button"
               phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-form-#{@variant}")}
-              class="text-slate-400 hover:text-primary-600"
+              class="text-neutral-400 hover:text-neutral-900"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />
             </button>
@@ -318,14 +329,18 @@ defmodule AshAdmin.Components.Sidebar do
         </.form>
       </div>
       <div :if={!@editing_tenant} class="flex items-center gap-2 text-sm">
-        <a href="#" phx-click="start_editing_tenant" class="text-slate-700 hover:text-primary-600 dark:text-slate-300 dark:hover:text-primary-400">
+        <a
+          href="#"
+          phx-click="start_editing_tenant"
+          class="text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
+        >
           {tenant_display(assigns)}
         </a>
         <button
           :if={@tenant}
           type="button"
           phx-click="clear_tenant"
-          class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+          class="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
         >
           <AshAdmin.CoreComponents.icon name="hero-x-mark-mini" class="h-4 w-4" />
         </button>
@@ -335,28 +350,26 @@ defmodule AshAdmin.Components.Sidebar do
   end
 
   def mount(socket) do
-    {:ok, assign(socket, :expanded_domains, MapSet.new())}
+    {:ok, assign(socket, :expanded_domains, nil)}
   end
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
 
-    # Auto-expand the domain containing the current resource
+    # Seed once per mount: the domains the user left open (persisted in a cookie,
+    # since each `navigate` remounts the LiveView) plus the current resource's domain.
     socket =
-      if assigns[:domain] do
-        domain_name = AshAdmin.Domain.name(assigns.domain)
-
-        if MapSet.member?(socket.assigns.expanded_domains, domain_name) do
-          socket
-        else
-          assign(
-            socket,
-            :expanded_domains,
-            MapSet.put(socket.assigns.expanded_domains, domain_name)
-          )
-        end
-      else
+      if socket.assigns.expanded_domains do
         socket
+      else
+        expanded = socket.assigns.initial_expanded_domains || MapSet.new()
+
+        expanded =
+          if socket.assigns.domain,
+            do: MapSet.put(expanded, AshAdmin.Domain.name(socket.assigns.domain)),
+            else: expanded
+
+        assign(socket, :expanded_domains, expanded)
       end
 
     {:ok, socket}
@@ -370,7 +383,10 @@ defmodule AshAdmin.Components.Sidebar do
         MapSet.put(socket.assigns.expanded_domains, domain_name)
       end
 
-    {:noreply, assign(socket, :expanded_domains, expanded)}
+    {:noreply,
+     socket
+     |> assign(:expanded_domains, expanded)
+     |> push_event("set_expanded_domains", %{domains: MapSet.to_list(expanded)})}
   end
 
   defp domain_expanded?(expanded_domains, domain) do

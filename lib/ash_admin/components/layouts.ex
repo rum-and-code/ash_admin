@@ -49,7 +49,7 @@ defmodule AshAdmin.Layouts do
           <%= raw(render("app.css", %{})) %>
         </style>
       </head>
-      <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 h-screen overflow-hidden">
+      <body class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 h-screen overflow-hidden">
         {@inner_content}
       </body>
       <script nonce={csp_nonce(@conn, :script, @ash_admin_csp_nonce)}>

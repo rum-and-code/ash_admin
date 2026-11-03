@@ -23,7 +23,7 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :table, :any, required: true
   attr :prefix, :any, required: true
 
-  @value_box_class "mt-1.5 block w-full min-h-[2.25rem] px-3 py-2 rounded-lg text-sm break-words bg-slate-50 text-slate-900 ring-1 ring-inset ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:ring-white/10"
+  @value_box_class "mt-1.5 block w-full min-h-[2.25rem] px-3 py-2 rounded-lg text-sm break-words bg-neutral-50 text-neutral-900 ring-1 ring-inset ring-neutral-200 dark:bg-white/5 dark:text-neutral-100 dark:ring-white/10"
 
   def render(assigns) do
     ~H"""
@@ -60,23 +60,13 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     <div class="aa-card overflow-hidden">
       <h1 :if={@title} class="pt-2 pl-4 text-lg">{@title}</h1>
-      <button
-        :if={AshAdmin.Resource.actor?(@resource)}
-        class="float-right pt-4 pr-4"
-        phx-click="set_actor"
-        phx-value-resource={AshAdmin.Resource.name(@resource)}
-        phx-value-domain={AshAdmin.Domain.name(@domain)}
-        phx-value-pkey={encode_primary_key(@record)}
-      >
-        <.icon name="hero-key" class="h-5 w-5 text-slate-500 dark:text-slate-400" />
-      </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
           {render_attributes(assigns, @record, @resource)}
           <div :if={@show_calculations}>
             <div class="hidden sm:block" aria-hidden="true">
               <div class="py-5">
-                <div class="border-t border-slate-200 dark:border-white/10" />
+                <div class="border-t border-neutral-200 dark:border-white/10" />
               </div>
             </div>
             {render_calculations(assigns, @record, @resource)}
@@ -95,7 +85,7 @@ defmodule AshAdmin.Components.Resource.Show do
       title={@label}
       aria-label={@label}
       data-calculate
-      class="flex-none rounded text-slate-500 hover:bg-slate-200 hover:text-primary-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-primary-400"
+      class="flex-none rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
       style="padding: 0.125rem; margin: -0.125rem 0;"
     >
       <svg
@@ -197,7 +187,7 @@ defmodule AshAdmin.Components.Resource.Show do
       <div class="flex justify-center mb-4">
         <nav
           role="tablist"
-          class="inline-flex flex-wrap gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/5"
+          class="inline-flex flex-wrap gap-1 p-1 rounded-lg bg-neutral-100 dark:bg-white/5"
         >
           <button
             :for={relationship <- @relationships}
@@ -211,9 +201,9 @@ defmodule AshAdmin.Components.Resource.Show do
             class={
               classes([
                 "px-3 py-1.5 text-sm font-medium rounded-md",
-                "bg-white text-slate-900 shadow-sm ring-1 ring-slate-950/5 dark:bg-slate-800 dark:text-slate-100 dark:ring-white/10":
+                "bg-white text-neutral-900 shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-100 dark:ring-white/10":
                   relationship.name == @active.name,
-                "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200":
+                "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200":
                   relationship.name != @active.name
               ])
             }
@@ -227,8 +217,8 @@ defmodule AshAdmin.Components.Resource.Show do
         role="tabpanel"
         class="aa-card overflow-hidden"
       >
-        <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-slate-200 dark:border-white/10">
-          <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+        <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-neutral-200 dark:border-white/10">
+          <h2 class="text-base font-semibold text-neutral-900 dark:text-neutral-100">
             {to_name(@active.name)}
           </h2>
           <button
@@ -258,7 +248,7 @@ defmodule AshAdmin.Components.Resource.Show do
           </.error>
           <p
             :if={!loaded?(@record, @active.name) && !@load_errors[@active.name]}
-            class="text-sm text-slate-500 dark:text-slate-400"
+            class="text-sm text-neutral-500 dark:text-neutral-400"
           >
             Not loaded.
           </p>
@@ -441,7 +431,7 @@ defmodule AshAdmin.Components.Resource.Show do
     </div>
     <div :if={!Enum.empty?(@flags)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-slate-200 dark:border-white/10" />
+        <div class="border-t border-neutral-200 dark:border-white/10" />
       </div>
     </div>
     <div :if={!Enum.empty?(@flags)} class="grid grid-cols-6 gap-6">
@@ -463,7 +453,7 @@ defmodule AshAdmin.Components.Resource.Show do
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-slate-200 dark:border-white/10" />
+        <div class="border-t border-neutral-200 dark:border-white/10" />
       </div>
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="grid grid-cols-6 gap-6">
@@ -786,17 +776,17 @@ defmodule AshAdmin.Components.Resource.Show do
     case Map.get(record, name) do
       true ->
         ~H"""
-        <.icon name="hero-check" class="h-4 w-4 text-slate-600 dark:text-slate-400" />
+        <.icon name="hero-check" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
         """
 
       false ->
         ~H"""
-        <.icon name="hero-x-mark" class="h-4 w-4 text-slate-600 dark:text-slate-400" />
+        <.icon name="hero-x-mark" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
         """
 
       _ ->
         ~H"""
-        <.icon name="hero-minus" class="h-4 w-4 text-slate-600 dark:text-slate-400" />
+        <.icon name="hero-minus" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
         """
     end
   end
@@ -923,7 +913,7 @@ defmodule AshAdmin.Components.Resource.Show do
         title="Open the related record"
         aria-label="Open the related record"
         data-relationship-link
-        class="flex-none rounded text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+        class="flex-none rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
         style="padding: 0.125rem; margin: -0.125rem 0;"
       >
         <svg

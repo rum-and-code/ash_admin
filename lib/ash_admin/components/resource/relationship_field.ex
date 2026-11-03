@@ -181,7 +181,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
           >
             <.icon
               name="hero-x-circle"
-              class="h-5 w-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              class="h-5 w-5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
             />
           </button>
         </div>
@@ -207,9 +207,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
               class={[
                 "cursor-pointer select-none relative py-2 px-2 w-full truncate",
                 if(index == @highlighted_index,
-                  do: "text-white bg-primary-600 dark:bg-primary-500",
+                  do: "text-white bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900",
                   else:
-                    "text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-white/5"
+                    "text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-white/5"
                 )
               ]}
               role="option"
