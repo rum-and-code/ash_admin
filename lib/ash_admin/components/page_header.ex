@@ -17,14 +17,13 @@ defmodule AshAdmin.Components.PageHeader do
   attr :prefix, :any, required: true
 
   @doc """
-  Page header shown above the content: breadcrumb and title on the left, the
-  buttons for the current page on the right.
+  Page header shown above the content: breadcrumb and title on the left, a
+  single "Actions" dropdown on the right, split into sections: create, read,
+  update, destroy and generic actions. The update and destroy sections need a
+  record, so they only show on the show, update and destroy pages. The action
+  in use is highlighted.
 
-  - list: read action switcher, generic actions, create
-  - create: create action switcher
-  - show: update
-  - update: update action switcher, show, destroy
-  - destroy: destroy action switcher, show
+  The show page also has "Set as actor", the update and destroy pages "Show".
   """
   def page_header(assigns) do
     record =
@@ -59,24 +58,9 @@ defmodule AshAdmin.Components.PageHeader do
           {@title}
         </h1>
         <div class="flex-1" />
-        <div :if={@page in [:list, :generic]} class="flex items-center gap-2">
-          {read_action_switcher(assigns)}
-          {generic_actions_dropdown(assigns)}
-          <.action_button
-            id="create-actions-dropdown"
-            actions={actions(@resource, :create)}
-            label="New"
-            icon="hero-plus-mini"
-            variant={:primary}
-            path={&action_path(assigns, &1)}
-          />
-        </div>
-        <div :if={@page == :create} class="flex items-center gap-2">
-          {form_action_switcher(assigns)}
-        </div>
-        <div :if={@page == :show} class="flex items-center gap-2">
+        <div class="flex items-center gap-2">
           <button
-            :if={@loaded_record && AshAdmin.Resource.actor?(@resource)}
+            :if={@page == :show && @loaded_record && AshAdmin.Resource.actor?(@resource)}
             type="button"
             class={button_class(:secondary)}
             phx-click="set_actor"
@@ -86,31 +70,14 @@ defmodule AshAdmin.Components.PageHeader do
           >
             Set as actor
           </button>
-          <.action_button
-            id="update-actions-dropdown"
-            actions={actions(@resource, :update)}
-            label="Update"
-            variant={:primary}
-            path={&action_path(assigns, &1, @loaded_record)}
-          />
-        </div>
-        <div :if={@page in [:update, :destroy]} class="flex items-center gap-2">
-          {form_action_switcher(assigns)}
           <.link
-            :if={AshAdmin.Resource.show_action(@resource)}
+            :if={@page in [:update, :destroy] && AshAdmin.Resource.show_action(@resource)}
             navigate={show_path(assigns, @loaded_record)}
             class={button_class(:secondary)}
           >
             Show
           </.link>
-          <.action_button
-            :if={@page == :update}
-            id="destroy-actions-dropdown"
-            actions={actions(@resource, :destroy)}
-            label="Destroy"
-            variant={:danger}
-            path={&action_path(assigns, &1, @loaded_record)}
-          />
+          {actions_dropdown(assigns)}
         </div>
       </div>
     </div>
@@ -209,171 +176,93 @@ defmodule AshAdmin.Components.PageHeader do
     """
   end
 
-  attr :id, :string, required: true
-  attr :actions, :list, required: true
-  attr :label, :string, required: true
-  attr :icon, :string, default: nil
-  attr :variant, :atom, required: true
-  attr :path, :any, required: true, doc: "A function from an action to its path."
+  @sections [
+    create: "Create",
+    read: "Read",
+    update: "Update",
+    destroy: "Destroy",
+    action: "Generic"
+  ]
 
-  # A link for a single action, a dropdown for several, nothing for none.
-  defp action_button(%{actions: []} = assigns), do: ~H""
+  # One icon per action type, so a section reads at a glance.
+  defp type_icon(:create), do: "hero-plus-mini"
+  defp type_icon(:read), do: "hero-list-bullet-mini"
+  defp type_icon(:update), do: "hero-pencil-square-mini"
+  defp type_icon(:destroy), do: "hero-trash-mini"
+  defp type_icon(:action), do: "hero-bolt-mini"
 
-  defp action_button(%{actions: [action]} = assigns) do
-    assigns = assign(assigns, :action, action)
+  defp actions_dropdown(assigns) do
+    sections =
+      for {type, label} <- @sections,
+          type not in [:update, :destroy] or assigns.loaded_record,
+          actions = actions(assigns.resource, type),
+          actions != [],
+          do: {type, label, actions}
+
+    assigns = assign(assigns, :sections, sections)
 
     ~H"""
-    <.link navigate={@path.(@action)} class={button_class(@variant)}>
-      <AshAdmin.CoreComponents.icon :if={@icon} name={@icon} class="h-4 w-4" />
-      {@label}
-    </.link>
-    """
-  end
-
-  defp action_button(assigns) do
-    ~H"""
-    <div class="relative">
-      <button type="button" phx-click={JS.toggle(to: "##{@id}")} class={button_class(@variant)}>
-        <AshAdmin.CoreComponents.icon :if={@icon} name={@icon} class="h-4 w-4" />
-        {@label}
-        <AshAdmin.CoreComponents.icon name="hero-chevron-down-mini" class="h-4 w-4" />
+    <div :if={@sections != []} class="relative">
+      <button
+        type="button"
+        phx-click={JS.toggle(to: "#actions-dropdown")}
+        class={button_class(:secondary)}
+      >
+        Actions <AshAdmin.CoreComponents.icon name="hero-chevron-down-mini" class="h-4 w-4" />
       </button>
       <div
-        id={@id}
-        class={"hidden absolute right-0 top-full mt-1 w-48 #{menu_class()}"}
-        phx-click-away={JS.hide(to: "##{@id}")}
+        id="actions-dropdown"
+        class={"hidden absolute right-0 top-full mt-1.5 w-60 max-h-[70vh] overflow-y-auto #{menu_class()}"}
+        phx-click-away={JS.hide(to: "#actions-dropdown")}
       >
-        <.link :for={action <- @actions} navigate={@path.(action)} class={menu_item_class(false)}>
-          {action_label(action)}
-        </.link>
+        <div :for={{{type, label, actions}, index} <- Enum.with_index(@sections)}>
+          <div :if={index > 0} class="aa-menu-separator" />
+          <div class="aa-menu-label">{label}</div>
+          <.link
+            :for={action <- actions}
+            navigate={
+              !same_form?(assigns, type) &&
+                action_path(assigns, action, record_for(type, @loaded_record))
+            }
+            patch={same_form?(assigns, type) && action_path(assigns, action, @loaded_record)}
+            aria-current={current?(assigns, action) && "page"}
+            class={["aa-menu-item", type == :destroy && "aa-menu-item-danger"]}
+          >
+            <AshAdmin.CoreComponents.icon name={type_icon(type)} class="aa-menu-icon" />
+            <span class="flex-1 truncate">{action_label(action)}</span>
+            <AshAdmin.CoreComponents.icon
+              :if={current?(assigns, action)}
+              name="hero-check-mini"
+              class="h-4 w-4 shrink-0"
+            />
+          </.link>
+        </div>
       </div>
     </div>
     """
   end
 
-  defp button_class(:primary), do: "aa-btn-primary"
+  # Switching between actions of the current form's type patches the form in
+  # place, like the old form action switcher.
+  defp same_form?(%{page: page, action: %{type: type}}, type)
+       when page in [:create, :update, :destroy],
+       do: true
+
+  defp same_form?(_assigns, _type), do: false
+
+  defp record_for(type, record) when type in [:update, :destroy], do: record
+  defp record_for(_type, _record), do: nil
+
+  # The show page is a read action with a record, it is not the list.
+  defp current?(%{page: :show}, _action), do: false
+  defp current?(%{action: nil}, _action), do: false
+
+  defp current?(%{action: current}, action),
+    do: current.type == action.type && current.name == action.name
 
   defp button_class(:secondary), do: "aa-btn-secondary"
 
-  defp button_class(:danger), do: "aa-btn-danger"
-
   defp menu_class, do: "aa-menu"
-
-  defp menu_item_class(true), do: "aa-menu-item-active"
-  defp menu_item_class(false), do: "aa-menu-item"
-
-  # Small header toggles for the read action and the generic actions.
-  defp toggle_class(active?) do
-    [
-      "aa-btn-ghost",
-      active? && "bg-neutral-100 text-neutral-900 dark:bg-white/5 dark:text-neutral-100"
-    ]
-  end
-
-  defp read_action_switcher(assigns) do
-    # With a single read action, the breadcrumb already links to the list.
-    case actions(assigns.resource, :read) do
-      read_actions when length(read_actions) < 2 ->
-        ~H""
-
-      read_actions ->
-        assigns = assign(assigns, :read_actions, read_actions)
-
-        ~H"""
-        <div class="relative">
-          <button
-            type="button"
-            phx-click={JS.toggle(to: "#read-actions-dropdown")}
-            class={toggle_class(@page == :list)}
-          >
-            {if @page == :list, do: action_label(@action), else: "Read"}
-            <AshAdmin.CoreComponents.icon name="hero-chevron-down-mini" class="h-4 w-4" />
-          </button>
-          <div
-            id="read-actions-dropdown"
-            class={"hidden absolute right-0 top-full mt-1 w-48 #{menu_class()}"}
-            phx-click-away={JS.hide(to: "#read-actions-dropdown")}
-          >
-            <.link
-              :for={action <- @read_actions}
-              navigate={action_path(assigns, action)}
-              class={menu_item_class(@page == :list && @action.name == action.name)}
-            >
-              {action_label(action)}
-            </.link>
-          </div>
-        </div>
-        """
-    end
-  end
-
-  # Switches between the actions of the current form's type (create, update
-  # or destroy). Hidden when the type has a single action.
-  defp form_action_switcher(assigns) do
-    case actions(assigns.resource, assigns.action.type) do
-      form_actions when length(form_actions) < 2 ->
-        ~H""
-
-      form_actions ->
-        assigns = assign(assigns, :form_actions, form_actions)
-
-        ~H"""
-        <div class="relative">
-          <button
-            type="button"
-            phx-click={JS.toggle(to: "#form-actions-dropdown")}
-            class={toggle_class(true)}
-          >
-            {action_label(@action)}
-            <AshAdmin.CoreComponents.icon name="hero-chevron-down-mini" class="h-4 w-4" />
-          </button>
-          <div
-            id="form-actions-dropdown"
-            class={"hidden absolute right-0 top-full mt-1 w-48 #{menu_class()}"}
-            phx-click-away={JS.hide(to: "#form-actions-dropdown")}
-          >
-            <.link
-              :for={action <- @form_actions}
-              patch={action_path(assigns, action, @loaded_record)}
-              class={menu_item_class(@action.name == action.name)}
-            >
-              {action_label(action)}
-            </.link>
-          </div>
-        </div>
-        """
-    end
-  end
-
-  defp generic_actions_dropdown(assigns) do
-    assigns = assign(assigns, :generic_actions, actions(assigns.resource, :action))
-
-    ~H"""
-    <div :if={@generic_actions != []} class="relative">
-      <button
-        type="button"
-        phx-click={JS.toggle(to: "#generic-actions-dropdown")}
-        class={toggle_class(@page == :generic)}
-      >
-        {if @page == :generic, do: action_label(@action), else: "Actions"}
-        <AshAdmin.CoreComponents.icon name="hero-chevron-down-mini" class="h-4 w-4" />
-      </button>
-      <div
-        id="generic-actions-dropdown"
-        class={"hidden absolute right-0 top-full mt-1 w-48 #{menu_class()}"}
-        phx-click-away={JS.hide(to: "#generic-actions-dropdown")}
-      >
-        <.link
-          :for={action <- @generic_actions}
-          navigate={action_path(assigns, action)}
-          class={menu_item_class(@page == :generic && @action.name == action.name)}
-        >
-          {action_label(action)}
-        </.link>
-      </div>
-    </div>
-    """
-  end
 
   defp action_path(assigns, action, record \\ nil) do
     params =
