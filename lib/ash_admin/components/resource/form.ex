@@ -62,14 +62,14 @@ defmodule AshAdmin.Components.Resource.Form do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-6">
-        <div class="mt-5 md:mt-0 md:col-span-2">
+      <div class="md:mx-16 md:mt-6">
+        <div class="mt-5 md:mt-0">
           {render_form(assigns)}
         </div>
       </div>
 
-      <div :if={@type != :create} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
-        <div class="mt-5 md:mt-0 md:col-span-2">
+      <div :if={@type != :create} class="md:mx-16 md:mt-10">
+        <div class="mt-5 md:mt-0">
           {AshAdmin.Components.Resource.Show.render_show(
             assigns,
             @record,

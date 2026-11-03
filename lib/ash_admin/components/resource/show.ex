@@ -26,18 +26,18 @@ defmodule AshAdmin.Components.Resource.Show do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-6">
-        <div class="mt-5 md:mt-0 md:col-span-2">
+      <div class="md:mx-16 md:mt-6">
+        <div class="mt-5 md:mt-0">
           {render_show(assigns, @record, @resource)}
         </div>
       </div>
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
-        <div class="mt-5 md:mt-0 md:col-span-2">
+      <div class="md:mx-16 md:mt-10">
+        <div class="mt-5 md:mt-0">
           {render_calculations(assigns, @record, @resource)}
         </div>
       </div>
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
-        <div class="mt-5 md:mt-0 md:col-span-2">
+      <div class="md:mx-16 md:mt-10">
+        <div class="mt-5 md:mt-0">
           {render_relationships(assigns, @record, @resource)}
         </div>
       </div>
