@@ -12,44 +12,109 @@ defmodule AshAdmin.Components.PageHeader do
   attr :domain, :any, default: nil
   attr :action, :any, default: nil
   attr :action_type, :atom, default: nil
+  attr :record, :any, default: nil
   attr :table, :any, default: nil
   attr :prefix, :any, required: true
 
+  @doc """
+  Page header shown above the content: breadcrumb and title on the left, the
+  other actions and the create button on the right.
+  """
   def page_header(assigns) do
+    assigns =
+      assigns
+      |> assign(:menu_align, :right)
+      |> assign(:breadcrumb, breadcrumb_items(assigns))
+
     ~H"""
-    <header class="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700/50 px-4 h-14 flex items-center gap-3">
-      <%!-- Mobile hamburger --%>
-      <button
-        type="button"
-        phx-click="toggle_sidebar"
-        class="md:hidden -ml-1 p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-      >
-        <AshAdmin.CoreComponents.icon name="hero-bars-3" class="h-5 w-5" />
-      </button>
-
-      <%!-- Resource name --%>
-      <h1 :if={@resource} class="text-base font-semibold text-slate-900 dark:text-slate-100 truncate">
-        {AshAdmin.Resource.name(@resource)}
-      </h1>
-      <h1 :if={!@resource} class="text-base font-semibold text-slate-900 dark:text-slate-100">
-        {AshAdmin.title()}
-      </h1>
-
-      <%!-- Read action switcher --%>
-      <div :if={@resource} class="flex items-center gap-1 ml-2">
-        {read_action_switcher(assigns)}
-        {generic_actions_dropdown(assigns)}
+    <div class="mx-4 md:mx-16 pt-4 md:pt-8">
+      <.breadcrumb :if={@breadcrumb != []} items={@breadcrumb} />
+      <div class="mt-2 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          phx-click="toggle_sidebar"
+          class="md:hidden -ml-1 p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          <AshAdmin.CoreComponents.icon name="hero-bars-3" class="h-5 w-5" />
+        </button>
+        <h1 class="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100 truncate">
+          {if @resource, do: AshAdmin.Resource.name(@resource), else: AshAdmin.title()}
+        </h1>
+        <div class="flex-1" />
+        <div :if={@resource} class="flex items-center gap-1">
+          {read_action_switcher(assigns)}
+          {generic_actions_dropdown(assigns)}
+        </div>
+        <div :if={@resource}>
+          {create_action_button(assigns)}
+        </div>
       </div>
-
-      <%!-- Spacer --%>
-      <div class="flex-1" />
-
-      <%!-- Create button --%>
-      <div :if={@resource}>
-        {create_action_button(assigns)}
-      </div>
-    </header>
+    </div>
     """
+  end
+
+  # The first item is always the read (list) action. Other pages add their own
+  # action, or "Show" for a record opened from the list.
+  defp breadcrumb_items(%{resource: nil}), do: []
+
+  defp breadcrumb_items(assigns) do
+    list_action =
+      if assigns.action && assigns.action.type == :read do
+        assigns.action
+      else
+        assigns.resource |> get_read_actions() |> List.first()
+      end
+
+    list_item =
+      if list_action,
+        do: [{action_label(list_action), read_action_path(assigns, list_action)}],
+        else: []
+
+    current_item =
+      cond do
+        is_nil(assigns.action) -> []
+        assigns.action.type == :read and match?({:ok, %_{}}, assigns.record) -> [{"Show", nil}]
+        assigns.action.type == :read -> []
+        true -> [{action_label(assigns.action), nil}]
+      end
+
+    list_item ++ current_item
+  end
+
+  attr :items, :list,
+    required: true,
+    doc: "A list of `{label, path}`. A `nil` path renders plain text."
+
+  def breadcrumb(assigns) do
+    ~H"""
+    <nav aria-label="Breadcrumb">
+      <ol class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+        <li :for={{{label, path}, index} <- Enum.with_index(@items)} class="flex items-center gap-1.5">
+          <AshAdmin.CoreComponents.icon
+            :if={index > 0}
+            name="hero-chevron-right-mini"
+            class="h-4 w-4 text-slate-400 dark:text-slate-500"
+          />
+          <.link
+            :if={path}
+            navigate={path}
+            class="hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+          >
+            {label}
+          </.link>
+          <span :if={!path}>{label}</span>
+        </li>
+      </ol>
+    </nav>
+    """
+  end
+
+  defp read_action_path(assigns, action) do
+    "#{assigns.prefix}?domain=#{AshAdmin.Domain.name(assigns.domain)}&resource=#{AshAdmin.Resource.name(assigns.resource)}&action_type=read&action=#{action.name}&table=#{assigns.table}"
+  end
+
+  defp menu_position(assigns) do
+    if assigns[:menu_align] == :right, do: "right-0", else: "left-0"
   end
 
   defp read_action_switcher(assigns) do
@@ -98,7 +163,7 @@ defmodule AshAdmin.Components.PageHeader do
           </button>
           <div
             id="read-actions-dropdown"
-            class="hidden absolute left-0 top-full mt-1 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
+            class={"hidden absolute #{menu_position(assigns)} top-full mt-1 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"}
             phx-click-away={JS.hide(to: "#read-actions-dropdown")}
           >
             <.link
@@ -142,7 +207,7 @@ defmodule AshAdmin.Components.PageHeader do
       </button>
       <div
         id="generic-actions-dropdown"
-        class="hidden absolute left-0 top-full mt-1 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
+        class={"hidden absolute #{menu_position(assigns)} top-full mt-1 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"}
         phx-click-away={JS.hide(to: "#generic-actions-dropdown")}
       >
         <.link

@@ -61,8 +61,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def render(assigns) do
     ~H"""
-    <div class="md:pt-10 sm:mt-0">
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
+    <div>
+      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-6">
         <div class="mt-5 md:mt-0 md:col-span-2">
           {render_form(assigns)}
         </div>
