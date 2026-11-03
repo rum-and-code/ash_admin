@@ -63,9 +63,9 @@ defmodule AshAdmin.Components.Resource.GenericAction do
           </.form>
         </div>
       <% else %>
-        <div class="max-w-2xl mx-auto">
+        <div>
           <div class="aa-card overflow-hidden">
-            <div class="px-6 py-6">
+            <div>
               <.form
                 :let={form}
                 as={:form}
@@ -76,7 +76,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
               >
                 <div
                   :if={form.source.submitted_once?}
-                  class="mb-4 text-rose-600 dark:text-rose-400"
+                  class="mx-6 mt-6 text-rose-600 dark:text-rose-400"
                 >
                   <ul>
                     <li :for={{field, message} <- all_errors(form)}>
@@ -89,13 +89,15 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                     </li>
                   </ul>
                 </div>
-                {AshAdmin.Components.Resource.Form.render_attributes(
-                  assigns,
-                  @resource,
-                  @action,
-                  form
-                )}
-                <div class="pt-4 flex justify-center">
+                <div class="px-4 py-5 sm:p-6">
+                  {AshAdmin.Components.Resource.Form.render_attributes(
+                    assigns,
+                    @resource,
+                    @action,
+                    form
+                  )}
+                </div>
+                <div class="flex items-center gap-3 border-t border-slate-200 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-white/10 dark:bg-white/[0.02]">
                   <button
                     type="submit"
                     class="aa-btn-primary"

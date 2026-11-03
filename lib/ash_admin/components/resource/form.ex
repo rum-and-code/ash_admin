@@ -158,7 +158,7 @@ defmodule AshAdmin.Components.Resource.Form do
           />
         </.form>
       </div>
-      <div class="px-4 py-5 sm:p-6">
+      <div>
         <.form
           :let={form}
           for={@form}
@@ -174,7 +174,9 @@ defmodule AshAdmin.Components.Resource.Form do
             value={elem(kv, 1)}
             type="hidden"
           />
-          {render_attributes(assigns, @resource, @action, form)}
+          <div class="px-4 py-5 sm:p-6">
+            {render_attributes(assigns, @resource, @action, form)}
+          </div>
           <div class="flex items-center gap-3 border-t border-slate-200 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-white/10 dark:bg-white/[0.02]">
             <button
               type="submit"

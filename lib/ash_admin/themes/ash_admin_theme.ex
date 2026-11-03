@@ -25,7 +25,7 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   set :header_row_class, ""
 
   set :th_class,
-      "px-3 py-3 first:pl-6 last:pr-6 font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap"
+      "px-3 py-3 first:pl-6 last:pr-6 align-middle font-semibold leading-5 text-slate-900 dark:text-slate-100 whitespace-nowrap [&_.cursor-pointer]:inline-flex [&_.cursor-pointer]:items-center"
 
   set :tbody_class, "divide-y divide-slate-100 dark:divide-white/5"
 
@@ -33,7 +33,7 @@ defmodule AshAdmin.Themes.AshAdminTheme do
       "transition-colors duration-75 hover:bg-slate-100/60 dark:hover:bg-white/[0.04]"
 
   set :selected_row_class, "bg-primary-50/60 dark:bg-primary-500/10"
-  set :td_class, "px-3 py-3.5 first:pl-6 last:pr-6 text-slate-700 dark:text-slate-300"
+  set :td_class, "px-3 py-3 first:pl-6 last:pr-6 whitespace-nowrap text-slate-700 dark:text-slate-300"
   set :empty_class, "px-6 py-12 text-center text-sm text-slate-500 dark:text-slate-400"
   set :error_container_class, "px-6 py-12 text-center"
   set :error_message_class, "text-sm text-rose-600 dark:text-rose-400"
