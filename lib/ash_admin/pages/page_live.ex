@@ -110,15 +110,16 @@ defmodule AshAdmin.PageLive do
         phx-click="toggle_sidebar"
       />
       <div class="flex-1 flex flex-col min-w-0 min-h-0">
-        <PageHeader.page_header
-          resource={@resource}
-          domain={@domain}
-          action={@action}
-          action_type={@action_type}
-          table={@table}
-          prefix={@prefix}
-        />
         <main class="flex-1 min-h-0 overflow-y-auto admin-main">
+          <PageHeader.page_header
+            resource={@resource}
+            domain={@domain}
+            action={@action}
+            action_type={@action_type}
+            record={@record}
+            table={@table}
+            prefix={@prefix}
+          />
           <.live_component
             :if={@resource}
             module={Resource}

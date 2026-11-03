@@ -158,6 +158,29 @@ defmodule AshAdmin.Test.PageLiveTest do
     end
   end
 
+  describe "page header" do
+    test "the read page shows the read action in the breadcrumb and the actions above the table",
+         %{conn: conn} do
+      {:ok, view, _html} =
+        live(conn, "/api/admin?domain=Test&resource=Post&action_type=read")
+
+      refute has_element?(view, "header")
+      assert has_element?(view, "main nav[aria-label=Breadcrumb] a", "Read")
+      assert has_element?(view, "main h1", "Post")
+      assert has_element?(view, "main a, main button", "New")
+    end
+
+    test "the other pages add their action after the read action", %{conn: conn} do
+      {:ok, view, _html} =
+        live(conn, "/api/admin?domain=Test&resource=Post&action_type=create")
+
+      refute has_element?(view, "header")
+      assert has_element?(view, "main nav[aria-label=Breadcrumb] li:first-child a", "Read")
+      assert has_element?(view, "main nav[aria-label=Breadcrumb] li:last-child span", "Create")
+      assert has_element?(view, "main h1", "Post")
+    end
+  end
+
   test "allows uploading to an action with an upload argument", %{conn: conn} do
     {:ok, view, _html} =
       live(
