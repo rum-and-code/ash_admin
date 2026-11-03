@@ -66,7 +66,7 @@ defmodule AshAdmin.Components.Sidebar do
       <.link
         :if={@host_app_path}
         href={@host_app_path}
-        class="mt-2 flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
+        class="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
       >
         <AshAdmin.CoreComponents.icon name="hero-arrow-left-mini" class="h-4 w-4" />
         {@host_app_label}
