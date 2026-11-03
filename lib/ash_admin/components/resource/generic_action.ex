@@ -97,7 +97,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                     form
                   )}
                 </div>
-                <div class="flex items-center gap-3 border-t border-slate-200 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-white/10 dark:bg-white/[0.02]">
+                <div class="flex items-center gap-3 border-t border-neutral-200 bg-neutral-50/60 px-4 py-4 sm:px-6 dark:border-white/10 dark:bg-white/[0.02]">
                   <button
                     type="submit"
                     class="aa-btn-primary"
@@ -121,7 +121,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
   defp render_result(%{result: :ok} = assigns) do
     ~H"""
     <div class="flex justify-center pt-6">
-      <span class="text-sm text-slate-600 dark:text-slate-400">Success</span>
+      <span class="text-sm text-neutral-600 dark:text-neutral-400">Success</span>
     </div>
     """
   end

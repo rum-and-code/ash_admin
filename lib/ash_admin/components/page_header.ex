@@ -21,9 +21,10 @@ defmodule AshAdmin.Components.PageHeader do
   buttons for the current page on the right.
 
   - list: read action switcher, generic actions, create
+  - create: create action switcher
   - show: update
-  - update: show, destroy
-  - destroy: show
+  - update: update action switcher, show, destroy
+  - destroy: destroy action switcher, show
   """
   def page_header(assigns) do
     record =
@@ -49,12 +50,12 @@ defmodule AshAdmin.Components.PageHeader do
         <button
           type="button"
           phx-click="toggle_sidebar"
-          class="md:hidden -ml-1.5 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+          class="md:hidden -ml-1.5 rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-white/5 dark:hover:text-neutral-200"
           aria-label="Open navigation"
         >
           <AshAdmin.CoreComponents.icon name="hero-bars-3" class="h-5 w-5" />
         </button>
-        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-950 dark:text-white truncate">
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-neutral-950 dark:text-white truncate">
           {@title}
         </h1>
         <div class="flex-1" />
@@ -70,7 +71,21 @@ defmodule AshAdmin.Components.PageHeader do
             path={&action_path(assigns, &1)}
           />
         </div>
+        <div :if={@page == :create} class="flex items-center gap-2">
+          {form_action_switcher(assigns)}
+        </div>
         <div :if={@page == :show} class="flex items-center gap-2">
+          <button
+            :if={@loaded_record && AshAdmin.Resource.actor?(@resource)}
+            type="button"
+            class={button_class(:secondary)}
+            phx-click="set_actor"
+            phx-value-resource={AshAdmin.Resource.name(@resource)}
+            phx-value-domain={AshAdmin.Domain.name(@domain)}
+            phx-value-pkey={AshAdmin.Helpers.encode_primary_key(@loaded_record)}
+          >
+            Set as actor
+          </button>
           <.action_button
             id="update-actions-dropdown"
             actions={actions(@resource, :update)}
@@ -80,6 +95,7 @@ defmodule AshAdmin.Components.PageHeader do
           />
         </div>
         <div :if={@page in [:update, :destroy]} class="flex items-center gap-2">
+          {form_action_switcher(assigns)}
           <.link
             :if={AshAdmin.Resource.show_action(@resource)}
             navigate={show_path(assigns, @loaded_record)}
@@ -172,17 +188,17 @@ defmodule AshAdmin.Components.PageHeader do
   def breadcrumb(assigns) do
     ~H"""
     <nav aria-label="Breadcrumb">
-      <ol class="flex flex-wrap items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+      <ol class="flex flex-wrap items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
         <li :for={{{label, path}, index} <- Enum.with_index(@items)} class="flex items-center gap-1.5">
           <AshAdmin.CoreComponents.icon
             :if={index > 0}
             name="hero-chevron-right-mini"
-            class="h-4 w-4 text-slate-400 dark:text-slate-500"
+            class="h-4 w-4 text-neutral-400 dark:text-neutral-500"
           />
           <.link
             :if={path}
             navigate={path}
-            class="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+            class="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
           >
             {label}
           </.link>
@@ -250,7 +266,7 @@ defmodule AshAdmin.Components.PageHeader do
   defp toggle_class(active?) do
     [
       "aa-btn-ghost",
-      active? && "bg-slate-100 text-slate-900 dark:bg-white/5 dark:text-slate-100"
+      active? && "bg-neutral-100 text-neutral-900 dark:bg-white/5 dark:text-neutral-100"
     ]
   end
 
@@ -282,6 +298,44 @@ defmodule AshAdmin.Components.PageHeader do
               :for={action <- @read_actions}
               navigate={action_path(assigns, action)}
               class={menu_item_class(@page == :list && @action.name == action.name)}
+            >
+              {action_label(action)}
+            </.link>
+          </div>
+        </div>
+        """
+    end
+  end
+
+  # Switches between the actions of the current form's type (create, update
+  # or destroy). Hidden when the type has a single action.
+  defp form_action_switcher(assigns) do
+    case actions(assigns.resource, assigns.action.type) do
+      form_actions when length(form_actions) < 2 ->
+        ~H""
+
+      form_actions ->
+        assigns = assign(assigns, :form_actions, form_actions)
+
+        ~H"""
+        <div class="relative">
+          <button
+            type="button"
+            phx-click={JS.toggle(to: "#form-actions-dropdown")}
+            class={toggle_class(true)}
+          >
+            {action_label(@action)}
+            <AshAdmin.CoreComponents.icon name="hero-chevron-down-mini" class="h-4 w-4" />
+          </button>
+          <div
+            id="form-actions-dropdown"
+            class={"hidden absolute right-0 top-full mt-1 w-48 #{menu_class()}"}
+            phx-click-away={JS.hide(to: "#form-actions-dropdown")}
+          >
+            <.link
+              :for={action <- @form_actions}
+              patch={action_path(assigns, action, @loaded_record)}
+              class={menu_item_class(@action.name == action.name)}
             >
               {action_label(action)}
             </.link>

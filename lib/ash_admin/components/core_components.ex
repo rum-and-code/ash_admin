@@ -55,7 +55,11 @@ defmodule AshAdmin.CoreComponents do
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       class="relative z-50 hidden"
     >
-      <div id={"#{@id}-bg"} class="bg-slate-950/40 fixed inset-0 transition-opacity" aria-hidden="true" />
+      <div
+        id={"#{@id}-bg"}
+        class="bg-neutral-950/40 fixed inset-0 transition-opacity"
+        aria-hidden="true"
+      />
       <div
         class="fixed inset-0 overflow-y-auto"
         aria-labelledby={"#{@id}-title"}
@@ -71,7 +75,7 @@ defmodule AshAdmin.CoreComponents do
               phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
               phx-key="escape"
               phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
-              class="relative hidden rounded-2xl bg-white dark:bg-slate-900 p-10 shadow-xl ring-1 ring-slate-950/5 dark:ring-white/10 transition"
+              class="relative hidden rounded-xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900 p-6 shadow-lg transition"
             >
               <div class="absolute top-6 right-5">
                 <button
@@ -201,7 +205,7 @@ defmodule AshAdmin.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white dark:bg-slate-900">
+      <div class="mt-10 space-y-8 bg-white dark:bg-neutral-900">
         {render_slot(@inner_block, f)}
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           {render_slot(action, f)}
@@ -308,7 +312,7 @@ defmodule AshAdmin.CoreComponents do
 
     ~H"""
     <div>
-      <label class="flex items-center gap-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+      <label class="flex items-center gap-3 text-sm leading-6 text-neutral-700 dark:text-neutral-300">
         <input type="hidden" name={@name} value="false" />
         <input
           type="checkbox"
@@ -316,7 +320,7 @@ defmodule AshAdmin.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-600 dark:border-white/20 dark:bg-white/5"
+          class="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-400 dark:border-white/20 dark:bg-white/5"
           {@rest}
         />
         {@label}
@@ -427,10 +431,10 @@ defmodule AshAdmin.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
       <div>
-        <h1 class="text-base font-semibold leading-7 text-slate-950 dark:text-white">
+        <h1 class="text-base font-semibold leading-7 text-neutral-950 dark:text-white">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+        <p :if={@subtitle != []} class="mt-1 text-sm leading-6 text-neutral-500 dark:text-neutral-400">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -473,7 +477,7 @@ defmodule AshAdmin.CoreComponents do
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
       <table class="w-[40rem] mt-11 sm:w-full">
-        <thead class="text-sm text-left leading-6 text-slate-500 dark:text-slate-400">
+        <thead class="text-sm text-left leading-6 text-neutral-500 dark:text-neutral-400">
           <tr>
             <th :for={col <- @col} class="p-0 pr-6 pb-4 font-normal">{col[:label]}</th>
             <th class="relative p-0 pb-4"><span class="sr-only">{gettext("Actions")}</span></th>
@@ -482,27 +486,27 @@ defmodule AshAdmin.CoreComponents do
         <tbody
           id={@id}
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-slate-100 dark:divide-slate-700 border-t border-slate-200 dark:border-slate-700 text-sm leading-6 text-slate-700 dark:text-slate-300"
+          class="relative divide-y divide-neutral-100 dark:divide-neutral-700 border-t border-neutral-200 dark:border-neutral-700 text-sm leading-6 text-neutral-700 dark:text-neutral-300"
         >
-          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-slate-50">
+          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-neutral-50">
             <td
               :for={{col, i} <- Enum.with_index(@col)}
               phx-click={@row_click && @row_click.(row)}
               class={["relative p-0", @row_click && "hover:cursor-pointer"]}
             >
               <div class="block py-4 pr-6">
-                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 sm:rounded-l-xl" />
-                <span class={["relative", i == 0 && "font-semibold text-slate-900"]}>
+                <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-neutral-50 dark:group-hover:bg-neutral-800 sm:rounded-l-xl" />
+                <span class={["relative", i == 0 && "font-semibold text-neutral-900"]}>
                   {render_slot(col, @row_item.(row))}
                 </span>
               </div>
             </td>
             <td :if={@action != []} class="relative w-14 p-0">
               <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
-                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-slate-50 dark:group-hover:bg-slate-800 sm:rounded-r-xl" />
+                <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-neutral-50 dark:group-hover:bg-neutral-800 sm:rounded-r-xl" />
                 <span
                   :for={action <- @action}
-                  class="relative ml-4 font-semibold leading-6 text-slate-900 hover:text-slate-700"
+                  class="relative ml-4 font-semibold leading-6 text-neutral-900 hover:text-neutral-700"
                 >
                   {render_slot(action, @row_item.(row))}
                 </span>
@@ -532,10 +536,10 @@ defmodule AshAdmin.CoreComponents do
   def list(assigns) do
     ~H"""
     <div class="mt-14">
-      <dl class="-my-4 divide-y divide-slate-100">
+      <dl class="-my-4 divide-y divide-neutral-100">
         <div :for={item <- @item} class="flex gap-4 py-4 text-sm leading-6 sm:gap-8">
-          <dt class="w-1/4 flex-none text-slate-500">{item.title}</dt>
-          <dd class="text-slate-700">{render_slot(item)}</dd>
+          <dt class="w-1/4 flex-none text-neutral-500">{item.title}</dt>
+          <dd class="text-neutral-700">{render_slot(item)}</dd>
         </div>
       </dl>
     </div>
@@ -557,7 +561,7 @@ defmodule AshAdmin.CoreComponents do
     <div class="mt-16">
       <.link
         navigate={@navigate}
-        class="text-sm font-semibold leading-6 text-slate-900 hover:text-slate-700"
+        class="text-sm font-semibold leading-6 text-neutral-900 hover:text-neutral-700"
       >
         <.icon name="hero-arrow-left-solid" class="h-3 w-3" />
         {render_slot(@inner_block)}

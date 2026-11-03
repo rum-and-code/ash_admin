@@ -68,6 +68,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:tenant_options, tenant_options)
      |> assign(:tenant_suggestions, [])
      |> assign(:sidebar_open, false)
+     |> assign(:sidebar_expanded_domains, sidebar_expanded_domains(socket))
      |> then(fn socket ->
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
@@ -81,7 +82,7 @@ defmodule AshAdmin.PageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex h-full bg-slate-50 dark:bg-slate-950">
+    <div class="flex h-full bg-white dark:bg-neutral-950">
       <.live_component
         module={Sidebar}
         id="sidebar"
@@ -90,6 +91,7 @@ defmodule AshAdmin.PageLive do
         resource={@resource}
         prefix={@prefix}
         open={@sidebar_open}
+        initial_expanded_domains={@sidebar_expanded_domains}
         actor={@actor}
         actor_domain={@actor_domain}
         actor_resources={@actor_resources}
@@ -145,6 +147,17 @@ defmodule AshAdmin.PageLive do
       </div>
     </div>
     """
+  end
+
+  defp sidebar_expanded_domains(socket) do
+    with true <- Phoenix.LiveView.connected?(socket),
+         %{"sidebar_expanded_domains" => json} when is_binary(json) <-
+           Phoenix.LiveView.get_connect_params(socket),
+         {:ok, domains} when is_list(domains) <- Jason.decode(json) do
+      domains |> Enum.filter(&is_binary/1) |> MapSet.new()
+    else
+      _ -> nil
+    end
   end
 
   defp domains(otp_app) do

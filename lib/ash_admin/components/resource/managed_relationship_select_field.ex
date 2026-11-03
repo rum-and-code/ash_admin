@@ -105,9 +105,9 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
               class={[
                 "cursor-pointer select-none relative py-2 px-2 w-full truncate",
                 if(index == @highlighted_index,
-                  do: "text-white bg-primary-600 dark:bg-primary-500",
+                  do: "text-white bg-neutral-900 dark:bg-neutral-200 dark:text-neutral-900",
                   else:
-                    "text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-white/5"
+                    "text-neutral-900 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-white/5"
                 )
               ]}
               role="option"

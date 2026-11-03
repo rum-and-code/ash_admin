@@ -33650,6 +33650,13 @@ ${text}</tr>
       });
     }
   };
+  Hooks.SidebarState = {
+    mounted() {
+      this.handleEvent("set_expanded_domains", (payload) => {
+        setCookie("sidebar_expanded_domains", JSON.stringify(payload.domains));
+      });
+    }
+  };
   Hooks.PositionAbove = {
     mounted() {
       this.position();
@@ -33782,7 +33789,8 @@ ${text}</tr>
       actor_action: getCookie("actor_action"),
       actor_domain: getCookie("actor_domain"),
       actor_authorizing: getCookie("actor_authorizing"),
-      actor_paused: getCookie("actor_paused")
+      actor_paused: getCookie("actor_paused"),
+      sidebar_expanded_domains: getCookie("sidebar_expanded_domains")
     };
   };
   var liveSocket = new LiveView.LiveSocket(socketPath, Phoenix.Socket, {
