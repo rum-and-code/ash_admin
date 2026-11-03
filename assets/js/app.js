@@ -415,6 +415,7 @@ Hooks.Typeahead = {
         break;
 
       case "LI":
+      case "BUTTON":
         this.el.addEventListener("click", e => {
           window.setTimeout(function () { target_el.dispatchEvent(new Event("input", { bubbles: true })) }, 750);
         }, { signal });

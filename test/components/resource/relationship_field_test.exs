@@ -91,7 +91,7 @@ defmodule AshAdmin.Test.RelationshipFieldTest do
     assigns = %{
       id: "form-artist_id",
       resource: Artist,
-      value: artist.id,
+      value: artist && artist.id,
       actor: nil,
       authorizing: false,
       tenant: nil
@@ -231,6 +231,45 @@ defmodule AshAdmin.Test.RelationshipFieldTest do
     assert socket.assigns.suggestions == []
   end
 
+  test "open lists the first records without a search term" do
+    artist!()
+    socket = component_socket(nil)
+
+    {:noreply, socket} = RelationshipField.handle_event("open", %{}, socket)
+
+    assert [{"Prince", _id}] = socket.assigns.suggestions
+    assert socket.assigns.search_term == ""
+  end
+
+  test "ArrowDown with no suggestions opens the list" do
+    artist!()
+    socket = component_socket(nil)
+
+    {:noreply, socket} =
+      RelationshipField.handle_event("suggest", %{"value" => "", "key" => "ArrowDown"}, socket)
+
+    assert [{"Prince", _id}] = socket.assigns.suggestions
+  end
+
+  test "close hides the suggestions" do
+    artist!()
+    socket = component_socket(nil)
+
+    {:noreply, socket} = RelationshipField.handle_event("open", %{}, socket)
+    {:noreply, socket} = RelationshipField.handle_event("close", %{}, socket)
+
+    assert socket.assigns.suggestions == []
+  end
+
+  test "clear removes the selected record, not only its label" do
+    socket = component_socket(artist!())
+
+    {:noreply, socket} = RelationshipField.handle_event("clear", %{}, socket)
+
+    assert socket.assigns.selected_id == nil
+    assert socket.assigns.current_label == ""
+  end
+
   describe "when reads fail" do
     # `GuardedArtist` only authorizes reads when an actor is present, so
     # `authorizing: true` with no actor makes every read fail. This stands in
@@ -247,7 +286,7 @@ defmodule AshAdmin.Test.RelationshipFieldTest do
       assigns = %{
         id: "form-guarded_artist_id",
         resource: GuardedArtist,
-        value: artist.id,
+        value: artist && artist.id,
         actor: nil,
         authorizing: true,
         tenant: nil
