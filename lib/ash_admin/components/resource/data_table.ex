@@ -317,7 +317,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
         {nil, nil}
 
       pagination ->
-        page_size = pagination.default_limit || pagination.max_page_size || 100
+        default = pagination.default_limit || pagination.max_page_size || 100
+        page_size = [default: default, options: page_size_options(default, pagination)]
 
         pagination_mode =
           if pagination.keyset? && !pagination.offset? do
@@ -328,6 +329,15 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
         {page_size, pagination_mode}
     end
+  end
+
+  @page_size_options [10, 25, 50, 100]
+
+  defp page_size_options(default, pagination) do
+    [default | @page_size_options]
+    |> Enum.filter(&(is_nil(pagination.max_page_size) or &1 <= pagination.max_page_size))
+    |> Enum.uniq()
+    |> Enum.sort()
   end
 
   def handle_event("validate", %{"query" => query}, socket) do
