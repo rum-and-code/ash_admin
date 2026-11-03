@@ -52,7 +52,7 @@ defmodule AshAdmin.Resource.Field do
       type: :module,
       required: false,
       doc:
-        "The resource that an action argument references, e.g. `MyApp.Organization` for an `organization_id` argument. The argument renders as a relationship select or typeahead field instead of a text input. Only applicable to action arguments. The referenced resource needs a `label_field`."
+        "The resource that an action argument references, e.g. `MyApp.Organization` for an `organization_id` argument. The argument renders as a relationship select or typeahead field instead of a text input. Only applicable to action arguments. The referenced resource needs a `label_field`. At the form level it applies to every action with that argument; put the field in an `action` block to limit it to one action."
     ]
   ]
 

@@ -5,6 +5,8 @@
 
 spark_locals_without_parens = [
   accepted_extensions: 1,
+  action: 1,
+  action: 2,
   actor?: 1,
   actor_load: 1,
   create_actions: 1,

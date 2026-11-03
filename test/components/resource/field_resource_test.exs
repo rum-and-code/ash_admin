@@ -55,6 +55,27 @@ defmodule AshAdmin.Test.FieldResourceTest do
     end
   end
 
+  defmodule Coupon do
+    @moduledoc false
+    use Ash.Resource,
+      domain: Domain,
+      data_layer: Ash.DataLayer.Ets,
+      extensions: [AshAdmin.Resource]
+
+    admin do
+      label_field :code
+    end
+
+    actions do
+      defaults([:read])
+    end
+
+    attributes do
+      uuid_primary_key(:id)
+      attribute(:code, :string, public?: true)
+    end
+  end
+
   defmodule Member do
     @moduledoc false
     use Ash.Resource,
@@ -65,6 +86,12 @@ defmodule AshAdmin.Test.FieldResourceTest do
     admin do
       form do
         field :organization_id, resource: Organization
+        field :email, type: :short_text
+
+        action :apply_coupon do
+          field :coupon_id, resource: Coupon
+          field :email, type: :long_text
+        end
       end
     end
 
@@ -76,6 +103,15 @@ defmodule AshAdmin.Test.FieldResourceTest do
         argument(:organization_id, :uuid)
         argument(:note, :string)
       end
+
+      update :apply_coupon do
+        accept([:email])
+        argument(:coupon_id, :uuid)
+      end
+
+      update :redeem_gift_card do
+        argument(:coupon_id, :uuid)
+      end
     end
 
     attributes do
@@ -84,8 +120,8 @@ defmodule AshAdmin.Test.FieldResourceTest do
     end
   end
 
-  defp field(name) do
-    action = Ash.Resource.Info.action(Member, :invite)
+  defp field(name, action_name \\ :invite) do
+    action = Ash.Resource.Info.action(Member, action_name)
     {auto_sorted, _flags, _defaults, _relationship_args} = Form.attributes(Member, action)
     Enum.find(auto_sorted, &(&1.name == name))
   end
@@ -101,6 +137,72 @@ defmodule AshAdmin.Test.FieldResourceTest do
 
     test "the label drops the _id suffix" do
       assert AshAdmin.Helpers.to_name(field(:organization_id)) == "Organization"
+    end
+  end
+
+  describe "action block" do
+    test "a field in an action block applies to that action" do
+      assert %{related_resource: Coupon} = field(:coupon_id, :apply_coupon)
+    end
+
+    test "it does not apply to other actions with the same argument" do
+      refute Map.has_key?(field(:coupon_id, :redeem_gift_card), :related_resource)
+    end
+
+    test "it replaces the form-level field for that action" do
+      assert AshAdmin.Resource.field(Member, :email, :apply_coupon).type == :long_text
+      assert AshAdmin.Resource.field(Member, :email, :invite).type == :short_text
+      assert AshAdmin.Resource.field(Member, :email).type == :short_text
+    end
+
+    test "form-level fields still apply to every action" do
+      assert %{related_resource: Organization} = field(:organization_id, :invite)
+    end
+
+    test "fields/1 only returns form-level fields" do
+      assert Enum.map(AshAdmin.Resource.fields(Member), & &1.name) == [:organization_id, :email]
+    end
+  end
+
+  describe "VerifyFormActions" do
+    test "rejects an action block for an unknown action" do
+      warnings =
+        compile_warnings(
+          quote do
+            admin do
+              form do
+                action :missing do
+                  field :note, type: :long_text
+                end
+              end
+            end
+          end
+        )
+
+      assert warnings =~ "has no action named `missing`"
+    end
+
+    test "rejects a field that is not an input of the action" do
+      warnings =
+        compile_warnings(
+          quote do
+            admin do
+              form do
+                action :invite do
+                  field :note, type: :long_text
+                end
+              end
+            end
+
+            actions do
+              create :invite do
+                argument(:organization_id, :uuid)
+              end
+            end
+          end
+        )
+
+      assert warnings =~ "is not an argument or an accepted attribute of that action"
     end
   end
 
@@ -141,6 +243,35 @@ defmodule AshAdmin.Test.FieldResourceTest do
         )
 
       assert warnings =~ "has no action with an argument named `organization_id`"
+    end
+
+    test "rejects a field in an action block whose action has no such argument" do
+      warnings =
+        compile_warnings(
+          quote do
+            admin do
+              form do
+                action :invite do
+                  field :organization_id,
+                    resource: AshAdmin.Test.FieldResourceTest.Organization
+                end
+              end
+            end
+
+            attributes do
+              attribute(:organization_id, :uuid, public?: true)
+            end
+
+            actions do
+              create :invite do
+                accept([:organization_id])
+              end
+            end
+          end
+        )
+
+      assert warnings =~ "the `invite` action of"
+      assert warnings =~ "has no argument named `organization_id`"
     end
 
     test "rejects a field that also sets a text type" do
