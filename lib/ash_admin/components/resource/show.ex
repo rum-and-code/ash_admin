@@ -928,11 +928,11 @@ defmodule AshAdmin.Components.Resource.Show do
       <.link
         navigate={@path}
         title="Open the related record"
-        aria-label="Open the related record"
         data-relationship-link
-        class="flex-none rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-        style="padding: 0.125rem; margin: -0.125rem 0;"
+        class="inline-flex flex-none items-center gap-1 rounded px-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+        style="padding-top: 0.125rem; padding-bottom: 0.125rem; margin: -0.125rem 0;"
       >
+        <span>Open</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
