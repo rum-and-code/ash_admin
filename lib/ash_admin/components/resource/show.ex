@@ -30,7 +30,7 @@ defmodule AshAdmin.Components.Resource.Show do
     <div>
       <div class="md:mx-16 md:mt-6">
         <div class="mt-5 md:mt-0">
-          {render_show(assigns, @record, @resource, nil, true, true)}
+          {render_show(assigns, @record, @resource, nil, true)}
         </div>
       </div>
       <div class="md:mx-16 md:mt-10">
@@ -47,7 +47,6 @@ defmodule AshAdmin.Components.Resource.Show do
         record,
         resource,
         title \\ nil,
-        buttons? \\ true,
         calculations? \\ false
       ) do
     assigns =
@@ -55,7 +54,6 @@ defmodule AshAdmin.Components.Resource.Show do
         record: record,
         resource: resource,
         title: title,
-        buttons: buttons?,
         show_calculations: calculations? && assigns[:calculations] not in [nil, []]
       )
 
@@ -82,39 +80,6 @@ defmodule AshAdmin.Components.Resource.Show do
               </div>
             </div>
             {render_calculations(assigns, @record, @resource)}
-          </div>
-          <div :if={@buttons} class="px-4 py-3 text-right sm:px-6">
-            <.link
-              :if={destroy?(@resource)}
-              navigate={
-                admin_path(@prefix,
-                  domain: AshAdmin.Domain.name(@domain),
-                  resource: AshAdmin.Resource.name(@resource),
-                  action_type: "destroy",
-                  table: @table,
-                  primary_key: encode_primary_key(@record)
-                )
-              }
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-            >
-              Destroy
-            </.link>
-
-            <.link
-              :if={update?(@resource)}
-              navigate={
-                admin_path(@prefix,
-                  domain: AshAdmin.Domain.name(@domain),
-                  resource: AshAdmin.Resource.name(@resource),
-                  action_type: "update",
-                  table: @table,
-                  primary_key: encode_primary_key(@record)
-                )
-              }
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
-            >
-              Update
-            </.link>
           </div>
         </div>
       </div>
@@ -1295,36 +1260,6 @@ defmodule AshAdmin.Components.Resource.Show do
 
       _ ->
         false
-    end
-  end
-
-  defp destroy?(resource) do
-    case AshAdmin.Resource.destroy_actions(resource) do
-      nil ->
-        resource
-        |> Ash.Resource.Info.actions()
-        |> Enum.any?(&(&1.type == :destroy))
-
-      [] ->
-        false
-
-      _ ->
-        true
-    end
-  end
-
-  defp update?(resource) do
-    case AshAdmin.Resource.update_actions(resource) do
-      nil ->
-        resource
-        |> Ash.Resource.Info.actions()
-        |> Enum.any?(&(&1.type == :update))
-
-      [] ->
-        false
-
-      _ ->
-        true
     end
   end
 

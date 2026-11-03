@@ -10,6 +10,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   import AshAdmin.Helpers
   alias AshAdmin.Components.Resource.Table
   alias AshAdmin.Themes.AshAdminTheme
+  alias Phoenix.LiveView.JS
 
   attr :resource, :atom
   attr :domain, :atom
@@ -108,6 +109,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 show_filters={@show_filters}
                 query_opts={[authorize?: @authorizing]}
                 theme={AshAdminTheme}
+                click={row_click(assigns)}
               >
                 <!-- Generate columns with simple sortable/filterable configuration -->
                 <:col
@@ -121,70 +123,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   {render_field_value(record, field_name, assigns)}
                 </:col>
 
-                <!-- Action buttons column -->
+                <!-- Row actions menu -->
                 <:col :let={record} :if={actions?(@resource)} label="">
-                  <div class="flex items-center gap-1">
-                    <%!-- Show --%>
-                    <.link
-                      :if={AshAdmin.Resource.show_action(@resource)}
-                      navigate={
-                        admin_path(@prefix,
-                          domain: AshAdmin.Domain.name(@domain),
-                          resource: AshAdmin.Resource.name(@resource),
-                          table: @table,
-                          primary_key: encode_primary_key(record),
-                          action_type: "read"
-                        )
-                      }
-                      class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                      title="View"
-                    >
-                      <AshAdmin.CoreComponents.icon name="hero-eye" class="h-4 w-4" />
-                    </.link>
-
-                    <%!-- Edit: direct or dropdown --%>
-                    <.row_actions
-                      actions={update_actions_list(@resource)}
-                      record={record}
-                      action_type="update"
-                      icon="hero-pencil"
-                      title="Edit"
-                      hover_class="hover:text-slate-600 dark:hover:text-slate-200"
-                      dropdown_id={"edit-dropdown-#{encode_primary_key(record)}"}
-                      prefix={@prefix}
-                      domain={@domain}
-                      resource={@resource}
-                      table={@table}
-                    />
-
-                    <%!-- Destroy: direct or dropdown --%>
-                    <.row_actions
-                      actions={destroy_actions_list(@resource)}
-                      record={record}
-                      action_type="destroy"
-                      icon="hero-trash"
-                      title="Delete"
-                      hover_class="hover:text-rose-500 dark:hover:text-rose-400"
-                      dropdown_id={"destroy-dropdown-#{encode_primary_key(record)}"}
-                      prefix={@prefix}
-                      domain={@domain}
-                      resource={@resource}
-                      table={@table}
-                    />
-
-                    <%!-- Set as actor --%>
-                    <button
-                      :if={AshAdmin.Resource.actor?(@resource)}
-                      phx-click="set_actor"
-                      phx-value-resource={AshAdmin.Resource.name(@resource)}
-                      phx-value-domain={AshAdmin.Domain.name(@domain)}
-                      phx-value-pkey={encode_primary_key(record)}
-                      class="p-1 text-slate-400 hover:text-amber-500 dark:hover:text-amber-400"
-                      title="Set as actor"
-                    >
-                      <AshAdmin.CoreComponents.icon name="hero-key" class="h-4 w-4" />
-                    </button>
-                  </div>
+                  <.row_menu
+                    id={"row-menu-#{encode_primary_key(record)}"}
+                    record={record}
+                    prefix={@prefix}
+                    domain={@domain}
+                    resource={@resource}
+                    table={@table}
+                  />
                 </:col>
               </Cinder.collection>
             </div>
@@ -195,76 +143,104 @@ defmodule AshAdmin.Components.Resource.DataTable do
     """
   end
 
-  attr :actions, :list, required: true
+  # Opens the record's show page when a row is clicked.
+  defp row_click(assigns) do
+    if AshAdmin.Resource.show_action(assigns.resource) do
+      fn record -> JS.navigate(record_path(assigns, record, :read)) end
+    end
+  end
+
+  defp record_path(assigns, record, action_type, action \\ nil) do
+    admin_path(assigns.prefix,
+      domain: AshAdmin.Domain.name(assigns.domain),
+      resource: AshAdmin.Resource.name(assigns.resource),
+      action_type: action_type,
+      action: action && action.name,
+      table: assigns.table,
+      primary_key: encode_primary_key(record)
+    )
+  end
+
+  attr :id, :string, required: true
   attr :record, :any, required: true
-  attr :action_type, :string, required: true
-  attr :icon, :string, required: true
-  attr :title, :string, required: true
-  attr :hover_class, :string, required: true
-  attr :dropdown_id, :string, required: true
   attr :prefix, :any, required: true
   attr :domain, :any, required: true
   attr :resource, :any, required: true
   attr :table, :any, required: true
 
-  defp row_actions(%{actions: []} = assigns), do: ~H""
+  # The ⋮ menu at the end of each row. Every element in it has a phx-click,
+  # so a click inside the menu never reaches the row's own click.
+  defp row_menu(assigns) do
+    assigns =
+      assign(assigns,
+        update_actions: update_actions_list(assigns.resource),
+        destroy_actions: destroy_actions_list(assigns.resource)
+      )
 
-  defp row_actions(%{actions: [_single]} = assigns) do
     ~H"""
-    <.link
-      navigate={
-        admin_path(@prefix,
-          domain: AshAdmin.Domain.name(@domain),
-          resource: AshAdmin.Resource.name(@resource),
-          action_type: @action_type,
-          action: hd(@actions).name,
-          table: @table,
-          primary_key: encode_primary_key(@record)
-        )
-      }
-      class={["p-1 text-slate-400", @hover_class]}
-      title={@title}
-    >
-      <AshAdmin.CoreComponents.icon name={@icon} class="h-4 w-4" />
-    </.link>
-    """
-  end
-
-  defp row_actions(assigns) do
-    ~H"""
-    <div class="relative">
+    <div class="relative flex justify-end" phx-click={JS.toggle(to: "##{@id}")}>
       <button
         type="button"
-        phx-click={Phoenix.LiveView.JS.toggle(to: "##{@dropdown_id}")}
-        class={["p-1 text-slate-400", @hover_class]}
-        title={@title}
+        class="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800"
+        title="Actions"
+        aria-label="Actions"
       >
-        <AshAdmin.CoreComponents.icon name={@icon} class="h-4 w-4" />
+        <AshAdmin.CoreComponents.icon name="hero-ellipsis-vertical" class="h-5 w-5" />
       </button>
       <div
-        id={@dropdown_id}
-        class="hidden absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
-        phx-click-away={Phoenix.LiveView.JS.hide(to: "##{@dropdown_id}")}
+        id={@id}
+        class="hidden absolute right-0 top-full mt-1 w-48 text-left bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
+        phx-click-away={JS.hide(to: "##{@id}")}
       >
         <.link
-          :for={action <- @actions}
-          navigate={
-            admin_path(@prefix,
-              domain: AshAdmin.Domain.name(@domain),
-              resource: AshAdmin.Resource.name(@resource),
-              action_type: @action_type,
-              action: action.name,
-              table: @table,
-              primary_key: encode_primary_key(@record)
+          :if={AshAdmin.Resource.show_action(@resource)}
+          navigate={record_path(assigns, @record, :read)}
+          class={row_menu_item_class()}
+        >
+          Show
+        </.link>
+        <.link
+          :for={action <- @update_actions}
+          navigate={record_path(assigns, @record, :update, action)}
+          class={row_menu_item_class()}
+        >
+          {action_label(action)}
+        </.link>
+        <button
+          :if={AshAdmin.Resource.actor?(@resource)}
+          type="button"
+          phx-click={
+            JS.hide(to: "##{@id}")
+            |> JS.push("set_actor",
+              value: %{
+                resource: AshAdmin.Resource.name(@resource),
+                domain: AshAdmin.Domain.name(@domain),
+                pkey: encode_primary_key(@record)
+              }
             )
           }
-          class="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+          class={["w-full text-left", row_menu_item_class()]}
+        >
+          Set as actor
+        </button>
+        <div
+          :if={@destroy_actions != []}
+          class="my-1 border-t border-slate-200 dark:border-slate-700"
+        />
+        <.link
+          :for={action <- @destroy_actions}
+          navigate={record_path(assigns, @record, :destroy, action)}
+          class="block px-3 py-1.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20"
         >
           {action_label(action)}
         </.link>
       </div>
     </div>
     """
+  end
+
+  defp row_menu_item_class do
+    "block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
   end
 
   def mount(socket) do

@@ -16,21 +16,21 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
       blog_link = %{
         active: false,
         group: :group_b,
-        text: "Blog",
+        text: "Blogs",
         to: "/admin?domain=Test&resource=Blog"
       }
 
       post_link = %{
         active: true,
         group: :group_a,
-        text: "Post",
+        text: "Posts",
         to: "/admin?domain=Test&resource=Post"
       }
 
       comment_link = %{
         active: false,
         group: nil,
-        text: "Comment",
+        text: "Comments",
         to: "/admin?domain=Test&resource=Comment"
       }
 
@@ -46,9 +46,9 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
       domain = AshAdmin.Test.Domain
 
       assert [
-               [%{group: :group_b, text: "Blog"} = _blog_link],
-               [%{group: :group_a, text: "Post"} = _post_link],
-               [%{group: nil, text: "Comment"} = _comment_link]
+               [%{group: :group_b, text: "Blogs"} = _blog_link],
+               [%{group: :group_a, text: "Posts"} = _post_link],
+               [%{group: nil, text: "Comments"} = _comment_link]
              ] = DropdownHelper.dropdown_groups(prefix, current_resource, domain)
     end
   end
