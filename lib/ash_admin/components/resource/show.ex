@@ -23,17 +23,17 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :table, :any, required: true
   attr :prefix, :any, required: true
 
-  @value_box_class "mt-1 block w-full min-h-[2.375rem] px-3 py-2 rounded-md border shadow-sm sm:text-sm break-words border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+  @value_box_class "mt-1.5 block w-full min-h-[2.25rem] px-3 py-2 rounded-lg text-sm break-words bg-slate-50 text-slate-900 ring-1 ring-inset ring-slate-200 dark:bg-white/5 dark:text-slate-100 dark:ring-white/10"
 
   def render(assigns) do
     ~H"""
     <div>
-      <div class="md:mx-16 md:mt-6">
+      <div class="md:mx-8 md:mt-6">
         <div class="mt-5 md:mt-0">
           {render_show(assigns, @record, @resource, nil, true)}
         </div>
       </div>
-      <div class="md:mx-16 md:mt-10">
+      <div class="md:mx-8 md:mt-10">
         <div class="mt-5 md:mt-0">
           {render_relationships(assigns, @record, @resource)}
         </div>
@@ -58,7 +58,7 @@ defmodule AshAdmin.Components.Resource.Show do
       )
 
     ~H"""
-    <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
+    <div class="aa-card overflow-hidden">
       <h1 :if={@title} class="pt-2 pl-4 text-lg">{@title}</h1>
       <button
         :if={AshAdmin.Resource.actor?(@resource)}
@@ -76,7 +76,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <div :if={@show_calculations}>
             <div class="hidden sm:block" aria-hidden="true">
               <div class="py-5">
-                <div class="border-t border-slate-200 dark:border-slate-700" />
+                <div class="border-t border-slate-200 dark:border-white/10" />
               </div>
             </div>
             {render_calculations(assigns, @record, @resource)}
@@ -95,7 +95,7 @@ defmodule AshAdmin.Components.Resource.Show do
       title={@label}
       aria-label={@label}
       data-calculate
-      class="flex-none rounded text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+      class="flex-none rounded text-slate-500 hover:bg-slate-200 hover:text-primary-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-primary-400"
       style="padding: 0.125rem; margin: -0.125rem 0;"
     >
       <svg
@@ -131,7 +131,7 @@ defmodule AshAdmin.Components.Resource.Show do
         id={"calculation-#{calculation.name}"}
         class="col-span-6 sm:col-span-3"
       >
-        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div class="aa-label">
           {to_name(calculation.name)}
         </div>
         <.form
@@ -197,7 +197,7 @@ defmodule AshAdmin.Components.Resource.Show do
       <div class="flex justify-center mb-4">
         <nav
           role="tablist"
-          class="inline-flex flex-wrap gap-1 p-1 rounded-lg shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 bg-white dark:bg-slate-900"
+          class="inline-flex flex-wrap gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/5"
         >
           <button
             :for={relationship <- @relationships}
@@ -211,7 +211,7 @@ defmodule AshAdmin.Components.Resource.Show do
             class={
               classes([
                 "px-3 py-1.5 text-sm font-medium rounded-md",
-                "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100":
+                "bg-white text-slate-900 shadow-sm ring-1 ring-slate-950/5 dark:bg-slate-800 dark:text-slate-100 dark:ring-white/10":
                   relationship.name == @active.name,
                 "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200":
                   relationship.name != @active.name
@@ -225,9 +225,9 @@ defmodule AshAdmin.Components.Resource.Show do
       <div
         id={"relationship-panel-#{@active.name}"}
         role="tabpanel"
-        class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900"
+        class="aa-card overflow-hidden"
       >
-        <div class="flex items-center justify-between gap-4 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between gap-4 px-6 py-3 border-b border-slate-200 dark:border-white/10">
           <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
             {to_name(@active.name)}
           </h2>
@@ -237,7 +237,7 @@ defmodule AshAdmin.Components.Resource.Show do
             phx-target={@myself}
             phx-value-relationship={@active.name}
             type="button"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+            class="aa-btn-primary"
           >
             Load
           </button>
@@ -247,7 +247,7 @@ defmodule AshAdmin.Components.Resource.Show do
             phx-target={@myself}
             phx-value-relationship={@active.name}
             type="button"
-            class="inline-flex justify-center py-2 px-4 border border-slate-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+            class="aa-btn-secondary"
           >
             Unload
           </button>
@@ -347,7 +347,7 @@ defmodule AshAdmin.Components.Resource.Show do
                   action_type: "read"
                 )
               }
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+              class="aa-btn-primary"
             >
               Show
             </.link>
@@ -433,7 +433,7 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div class="aa-label">
           {to_name(attribute.name)}
         </div>
         {render_field_value(assigns, @resource, @record, attribute, @relationship_name, nil)}
@@ -441,7 +441,7 @@ defmodule AshAdmin.Components.Resource.Show do
     </div>
     <div :if={!Enum.empty?(@flags)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-slate-200 dark:border-slate-700" />
+        <div class="border-t border-slate-200 dark:border-white/10" />
       </div>
     </div>
     <div :if={!Enum.empty?(@flags)} class="grid grid-cols-6 gap-6">
@@ -455,7 +455,7 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div class="aa-label">
           {to_name(attribute.name)}
         </div>
         {render_field_value(assigns, @resource, @record, attribute, @relationship_name, nil)}
@@ -463,7 +463,7 @@ defmodule AshAdmin.Components.Resource.Show do
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-slate-200 dark:border-slate-700" />
+        <div class="border-t border-slate-200 dark:border-white/10" />
       </div>
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="grid grid-cols-6 gap-6">
@@ -478,7 +478,7 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div class="aa-label">
           {to_name(attribute.name)}
         </div>
         {render_field_value(assigns, @resource, @record, attribute, @relationship_name, nil)}

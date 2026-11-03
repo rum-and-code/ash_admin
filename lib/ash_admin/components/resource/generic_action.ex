@@ -56,7 +56,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
             )}
             <button
               type="submit"
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+              class="aa-btn-primary"
             >
               Run
             </button>
@@ -64,7 +64,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
         </div>
       <% else %>
         <div class="max-w-2xl mx-auto">
-          <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
+          <div class="aa-card overflow-hidden">
             <div class="px-6 py-6">
               <.form
                 :let={form}
@@ -98,7 +98,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                 <div class="pt-4 flex justify-center">
                   <button
                     type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+                    class="aa-btn-primary"
                   >
                     Run
                   </button>
@@ -129,7 +129,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
     ~H"""
     <div class="max-w-2xl mx-auto mt-6">
-      <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900 px-6 py-4">
+      <div class="aa-card overflow-auto px-6 py-4">
         {render_value(assigns, @result_value, @action.returns, @action.constraints)}
       </div>
     </div>
@@ -221,7 +221,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
     if (is_map(value) || Keyword.keyword?(value)) && Keyword.keyword?(constraints[:fields]) do
       ~H"""
       <%= for {key, config} <- @constraints[:fields] do %>
-        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div class="aa-label">
           {to_name(key)}
         </div>
         <div>

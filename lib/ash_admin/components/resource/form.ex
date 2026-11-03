@@ -62,13 +62,13 @@ defmodule AshAdmin.Components.Resource.Form do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="md:mx-16 md:mt-6">
+      <div class="md:mx-8 md:mt-6">
         <div class="mt-5 md:mt-0">
           {render_form(assigns)}
         </div>
       </div>
 
-      <div :if={@type != :create} class="md:mx-16 md:mt-10">
+      <div :if={@type != :create} class="md:mx-8 md:mt-10">
         <div class="mt-5 md:mt-0">
           {AshAdmin.Components.Resource.Show.render_show(
             assigns,
@@ -109,10 +109,10 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp render_form(assigns) do
     ~H"""
-    <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
+    <div class="aa-card overflow-hidden">
       <div
         :if={@form.source.submitted_once? && has_forbidden_error?(@form.source)}
-        class="mx-4 mt-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-300 dark:border-rose-700 rounded-md"
+        class="mx-4 mt-4 rounded-lg bg-rose-50 p-3 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:ring-rose-500/20"
       >
         <p class="text-rose-800 dark:text-rose-300 font-medium">
           You are not authorized to perform this action.
@@ -175,23 +175,16 @@ defmodule AshAdmin.Components.Resource.Form do
             type="hidden"
           />
           {render_attributes(assigns, @resource, @action, form)}
-          <div class="flex items-center gap-2 px-4 py-3 sm:px-6">
+          <div class="flex items-center gap-3 border-t border-slate-200 bg-slate-50/60 px-4 py-4 sm:px-6 dark:border-white/10 dark:bg-white/[0.02]">
             <button
               type="submit"
-              class={[
-                "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
-                if(@type == :destroy,
-                  do: "text-white bg-rose-600 hover:bg-rose-500 focus:ring-rose-500",
-                  else:
-                    "text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:ring-slate-500"
-                )
-              ]}
+              class={if(@type == :destroy, do: "aa-btn-danger", else: "aa-btn-primary")}
             >
               {save_button_text(@type)}
             </button>
             <.link
               navigate={cancel_path(assigns)}
-              class="inline-flex justify-center py-2 px-4 shadow-sm text-sm font-medium rounded-md text-slate-700 dark:text-slate-200 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 ring-1 ring-slate-300 dark:ring-slate-700"
+              class="aa-btn-secondary"
             >
               Cancel
             </.link>
@@ -266,7 +259,7 @@ defmodule AshAdmin.Components.Resource.Form do
       >
         <div>
           <label
-            class="block text-sm font-medium text-slate-700 dark:text-slate-300"
+            class="aa-label"
             for={@form.name <> "[#{attribute.name}]"}
           >
             {to_name(attribute)}
@@ -283,7 +276,7 @@ defmodule AshAdmin.Components.Resource.Form do
     </div>
     <div :if={!Enum.empty?(flags)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-slate-200 dark:border-slate-700" />
+        <div class="border-t border-slate-200 dark:border-white/10" />
       </div>
     </div>
     <div :if={!Enum.empty?(flags)} class="grid grid-cols-6 gap-6">
@@ -298,7 +291,7 @@ defmodule AshAdmin.Components.Resource.Form do
         }
       >
         <label
-          class="block text-sm font-medium text-slate-700 dark:text-slate-300"
+          class="aa-label"
           for={@form.name <> "[#{attribute.name}]"}
         >
           {to_name(attribute.name)}
@@ -314,7 +307,7 @@ defmodule AshAdmin.Components.Resource.Form do
     </div>
     <div :if={!Enum.empty?(bottom_attributes)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-slate-200 dark:border-slate-700" />
+        <div class="border-t border-slate-200 dark:border-white/10" />
       </div>
     </div>
     <div :if={!Enum.empty?(bottom_attributes)} class="grid grid-cols-6 gap-6">
@@ -330,7 +323,7 @@ defmodule AshAdmin.Components.Resource.Form do
         }
       >
         <label
-          class="block text-sm font-medium text-slate-700 dark:text-slate-300"
+          class="aa-label"
           for={@form.name <> "[#{attribute.name}]"}
         >
           {to_name(attribute.name)}
@@ -349,7 +342,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <% rel = Ash.Resource.Info.relationship(@form.source.resource, relationship) %>
         <% simple_select? = simple_select_relationship?(rel, argument, opts) %>
         <label
-          class="block text-sm font-medium text-slate-700 dark:text-slate-300"
+          class="aa-label"
           for={@form.name <> "[#{argument.name}]"}
         >
           {to_name(argument.name)}
@@ -456,7 +449,7 @@ defmodule AshAdmin.Components.Resource.Form do
     ~H"""
     <div :if={!must_load?(@opts) || loaded?(@form.source.source, @relationship.name)}>
       <.inputs_for :let={inner_form} field={@form[@argument.name]}>
-        <div class="mt-3 ml-1 pl-4 border-l-2 border-slate-200 dark:border-slate-600">
+        <div class="mt-3 ml-1 pl-4 border-l border-slate-200 dark:border-white/10">
           <div :if={@form.source.submitted_once?} class="mt-2 mb-2 text-rose-600 dark:text-rose-400">
             <ul>
               <li :for={{field, message} <- AshPhoenix.Form.errors(inner_form.source)}>
@@ -554,7 +547,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-path={@form.name <> "[#{@argument.name}]"}
           phx-value-type="lookup"
           phx-value-cardinality={to_string(@relationship.cardinality)}
-          class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
         >
           <.icon name="hero-magnifying-glass" class="h-3 w-3" /> Look up
         </button>
@@ -566,7 +559,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-target={@myself}
           phx-value-path={@form.name <> "[#{@argument.name}]"}
           phx-value-type="create"
-          class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
         >
           <.icon name="hero-plus" class="h-3 w-3" /> Create new
         </button>
@@ -580,7 +573,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-target={@myself}
           phx-value-path={@form.name <> "[#{@argument.name}]"}
           phx-value-type="lookup"
-          class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
         >
           <.icon name="hero-plus" class="h-3 w-3" /> Add
         </button>
@@ -599,7 +592,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-path={@form.name}
         phx-value-relationship={@relationship.name}
         type="button"
-        class="flex py-2 ml-4 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md justify-center items-center"
+        class="aa-btn-primary ml-4 mt-2"
       >
         Load
       </button>
@@ -683,7 +676,7 @@ defmodule AshAdmin.Components.Resource.Form do
             Enum.find_value(@all_options, pk_string, fn {l, id} ->
               if id == pk_string, do: l
             end) %>
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
+          <span class="aa-badge gap-1 bg-slate-50 text-slate-700 ring-slate-200 dark:bg-white/5 dark:text-slate-300 dark:ring-white/10">
             {label}
             <button
               type="button"
@@ -1184,14 +1177,14 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~H"""
     <%= if @uploaded_file do %>
-      <div class="flex items-center justify-between mt-2 w-full rounded-lg border border-zinc-300 text-zinc-900 text-sm overflow-hidden">
+      <div class="flex items-center justify-between mt-2 w-full rounded-lg ring-1 ring-inset ring-slate-300 text-slate-900 text-sm overflow-hidden dark:ring-white/10 dark:text-slate-100">
         <span class="px-2 py-2.5">{Path.basename(@uploaded_file.source)}</span>
         <button
           type="button"
           phx-click="remove_upload"
           phx-target={@myself}
           phx-value-upload-key={@upload_key}
-          class="px-3 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600"
+          class="px-3 py-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10"
         >
           <.icon name="hero-minus" class="h-4 w-4 text-slate-500 dark:text-slate-400" />
         </button>
@@ -1202,12 +1195,12 @@ defmodule AshAdmin.Components.Resource.Form do
         <.live_file_input
           id={@id || @upload_key}
           upload={@upload}
-          class="mt-2 block w-full rounded-lg border border-zinc-300 active:border-zinc-400 text-zinc-900 text-sm file:border-0 file:text-sm file:bg-slate-200 dark:file:bg-slate-700 file:me-4 file:py-2.5 file:px-4 focus:outline-none focus:border-zinc-400 target:border-zinc-400 cursor-pointer file:cursor-pointer"
+          class="mt-2 block w-full cursor-pointer rounded-lg text-sm text-slate-700 ring-1 ring-inset ring-slate-300 file:me-4 file:cursor-pointer file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-600 dark:text-slate-300 dark:ring-white/10 dark:file:bg-white/10 dark:file:text-slate-200"
         />
         <%= if length(@upload.entries) > 0 do %>
-          <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 mb-1 mt-1">
+          <div class="w-full bg-slate-200 dark:bg-white/10 rounded-full h-1.5 mb-1 mt-1">
             <div
-              class="bg-slate-700 dark:bg-slate-300 h-1.5 rounded-full"
+              class="bg-primary-600 dark:bg-primary-500 h-1.5 rounded-full"
               data-progress={hd(@upload.entries).progress}
               style={"width: #{hd(@upload.entries).progress}%"}
             >
@@ -1294,7 +1287,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <textarea
           id={@id || @form.id <> "_#{@attribute.name}"}
           name={@name || @form.name <> "[#{@attribute.name}]"}
-          class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md resize-y"
+          class="aa-input mt-1.5 resize-y"
           phx-hook="MaintainAttrs"
           data-attrs="style"
           placeholder={placeholder(@default)}
@@ -1304,7 +1297,7 @@ defmodule AshAdmin.Components.Resource.Form do
           type={text_input_type(@resource, @attribute)}
           id={@id || @form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
-          class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+          class="aa-input mt-1.5"
           name={@name || @form.name <> "[#{@attribute.name}]"}
           placeholder={placeholder(@default)}
         />
@@ -1326,7 +1319,7 @@ defmodule AshAdmin.Components.Resource.Form do
           placeholder={placeholder(@default)}
           id={@id || @form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
-          class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+          class="aa-input mt-1.5"
           name={@name || @form.name <> "[#{@attribute.name}]"}
         />
     <% end %>
@@ -1358,7 +1351,7 @@ defmodule AshAdmin.Components.Resource.Form do
       type="number"
       id={@id || @form.id <> "_#{@attribute.name}"}
       value={value(@value, @form, @attribute)}
-      class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+      class="aa-input mt-1.5"
       name={@name || @form.name <> "[#{@attribute.name}]"}
       placeholder={placeholder(@default)}
     />
@@ -1424,7 +1417,7 @@ defmodule AshAdmin.Components.Resource.Form do
         value={@encoded}
         name={@name || @form.name <> "[#{@attribute.name}]"}
         id={@id || @form.id <> "_#{@attribute.name}"}
-        class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+        class="aa-input mt-1.5"
       />
     </div>
     """
@@ -1436,7 +1429,7 @@ defmodule AshAdmin.Components.Resource.Form do
         disabled
         value="..."
         name={@name || @form.name <> "[#{@attribute.name}]"}
-        class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+        class="aa-input mt-1.5"
       />
       """
   end
@@ -1546,12 +1539,12 @@ defmodule AshAdmin.Components.Resource.Form do
     ~H"""
     <div class={
       if !is_nil(@actual_union_value),
-        do: "mt-3 ml-1 pl-4 border-l-2 border-slate-200 dark:border-slate-600",
+        do: "mt-3 ml-1 pl-4 border-l border-slate-200 dark:border-white/10",
         else: ""
     }>
       <label
         :if={!is_nil(@actual_union_value)}
-        class="block text-sm font-medium text-slate-700 dark:text-slate-300"
+        class="aa-label"
         for={@union_type_name}
       >
         Type
@@ -1604,7 +1597,7 @@ defmodule AshAdmin.Components.Resource.Form do
           {render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type)}
         <% match?({:array, _}, @attribute.type) && Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
-            <div class="mt-3 ml-1 pl-4 border-l-2 border-slate-200 dark:border-slate-600">
+            <div class="mt-3 ml-1 pl-4 border-l border-slate-200 dark:border-white/10">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
                   Item {inner_form.index + 1}
@@ -1614,7 +1607,7 @@ defmodule AshAdmin.Components.Resource.Form do
                   phx-click="remove_form"
                   phx-target={@myself}
                   phx-value-path={inner_form.name}
-                  class="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded"
+                  class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
                 >
                   <.icon name="hero-minus" class="h-3 w-3" /> Remove
                 </button>
@@ -1645,13 +1638,13 @@ defmodule AshAdmin.Components.Resource.Form do
             phx-value-pkey={embedded_type_pkey(@attribute.type)}
             phx-value-union-type={@union_type}
             phx-value-path={@form.name <> "[#{@attribute.name}]"}
-            class="inline-flex items-center gap-1 mt-2 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+            class="mt-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
           >
             <.icon name="hero-plus" class="h-3 w-3" /> Add item
           </button>
         <% Ash.Type.embedded_type?(@attribute.type) && match?([%AshPhoenix.Form{} | _], @value) -> %>
           <%= for {inner_form, idx} <- Enum.with_index(Enum.map(@value, &to_form/1)) do %>
-            <div class="mt-3 ml-1 pl-4 border-l-2 border-slate-200 dark:border-slate-600">
+            <div class="mt-3 ml-1 pl-4 border-l border-slate-200 dark:border-white/10">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
                   Item {idx + 1}
@@ -1661,7 +1654,7 @@ defmodule AshAdmin.Components.Resource.Form do
                   phx-click="remove_form"
                   phx-target={@myself}
                   phx-value-path={inner_form.name}
-                  class="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded"
+                  class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
                 >
                   <.icon name="hero-minus" class="h-3 w-3" /> Remove
                 </button>
@@ -1692,20 +1685,20 @@ defmodule AshAdmin.Components.Resource.Form do
             phx-value-union-type={@union_type}
             phx-value-pkey={embedded_type_pkey(@attribute.type)}
             phx-value-path={@form.name <> "[#{@attribute.name}]"}
-            class="inline-flex items-center gap-1 mt-2 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+            class="mt-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
           >
             <.icon name="hero-plus" class="h-3 w-3" /> Add item
           </button>
         <% Ash.Type.embedded_type?(@attribute.type) && match?(%AshPhoenix.Form{}, @value) -> %>
           <% inner_form = to_form(@value) %>
-          <div class="mt-3 ml-1 pl-4 border-l-2 border-slate-200 dark:border-slate-600">
+          <div class="mt-3 ml-1 pl-4 border-l border-slate-200 dark:border-white/10">
             <div class="flex items-center justify-end mb-2">
               <button
                 type="button"
                 phx-click="remove_form"
                 phx-target={@myself}
                 phx-value-path={inner_form.name}
-                class="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded"
+                class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
               >
                 <.icon name="hero-minus" class="h-3 w-3" /> Remove
               </button>
@@ -1731,14 +1724,14 @@ defmodule AshAdmin.Components.Resource.Form do
           {"AshPhoenix.FilterForm doesn't support embedded yet"}
         <% Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
-            <div class="mt-3 ml-1 pl-4 border-l-2 border-slate-200 dark:border-slate-600">
+            <div class="mt-3 ml-1 pl-4 border-l border-slate-200 dark:border-white/10">
               <div class="flex items-center justify-end mb-2">
                 <button
                   type="button"
                   phx-click="remove_form"
                   phx-target={@myself}
                   phx-value-path={inner_form.name}
-                  class="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded"
+                  class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
                 >
                   <.icon name="hero-minus" class="h-3 w-3" /> Remove
                 </button>
@@ -1769,7 +1762,7 @@ defmodule AshAdmin.Components.Resource.Form do
             phx-value-union-type={@union_type}
             phx-value-pkey={embedded_type_pkey(@attribute.type)}
             phx-value-path={@form.name <> "[#{@attribute.name}]"}
-            class="inline-flex items-center gap-1 mt-2 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+            class="mt-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
           >
             <.icon name="hero-plus" class="h-3 w-3" /> Add item
           </button>
@@ -1888,7 +1881,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-path={@form.name}
         phx-value-field={@attribute.name}
         phx-value-union-type={@union_type}
-        class="inline-flex items-center gap-1 mt-2 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded border border-slate-300 dark:border-slate-600"
+        class="mt-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-white/10 dark:hover:bg-white/5"
       >
         <.icon name="hero-plus" class="h-3 w-3" /> Add item
       </button>
@@ -1913,7 +1906,7 @@ defmodule AshAdmin.Components.Resource.Form do
       value={value(@value, @form, @attribute, @attribute.default)}
       name={@name || @form.name <> "[#{@attribute.name}]"}
       id={@id || @form.id <> "_#{@attribute.name}"}
-      class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+      class="aa-input mt-1.5"
     />
     """
   rescue
@@ -1929,7 +1922,7 @@ defmodule AshAdmin.Components.Resource.Form do
             value={value(@value, @form, @attribute, @attribute.default)}
             name={@name || @form.name <> "[#{@attribute.name}]"}
             id={@id || @form.id <> "_#{@attribute.name}"}
-            class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+            class="aa-input mt-1.5"
           />
           """
 
@@ -1941,7 +1934,7 @@ defmodule AshAdmin.Components.Resource.Form do
             value="..."
             name={@name || @form.name <> "[#{@attribute.name}]"}
             id={@id || @form.id <> "_#{@attribute.name}"}
-            class="mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
+            class="aa-input mt-1.5"
           />
           """
       end

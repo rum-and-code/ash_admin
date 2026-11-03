@@ -37,7 +37,7 @@ defmodule AshAdmin.Components.Sidebar do
       <%!-- Mobile sidebar --%>
       <aside class={[
         "fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-200 ease-in-out md:hidden",
-        "bg-slate-900 dark:bg-slate-900 flex flex-col",
+        "bg-white dark:bg-slate-900 flex flex-col shadow-xl",
         if(@open, do: "translate-x-0", else: "-translate-x-full")
       ]}>
         {render_sidebar_content(Map.put(assigns, :variant, :mobile))}
@@ -45,7 +45,7 @@ defmodule AshAdmin.Components.Sidebar do
 
       <div class="hidden md:flex md:w-64 md:shrink-0">
         <%!-- Desktop sidebar --%>
-        <aside class="flex flex-col w-64 bg-slate-900 dark:bg-slate-900 overflow-y-auto">
+        <aside class="flex flex-col w-64 bg-slate-50 dark:bg-slate-950 border-r border-slate-200/70 dark:border-white/5 overflow-y-auto">
           {render_sidebar_content(Map.put(assigns, :variant, :desktop))}
         </aside>
       </div>
@@ -56,10 +56,10 @@ defmodule AshAdmin.Components.Sidebar do
   defp render_sidebar_content(assigns) do
     ~H"""
     <%!-- Title --%>
-    <div class="px-4 py-4 border-b border-slate-700/50">
+    <div class="flex h-16 shrink-0 items-center px-6">
       <.link
         navigate={@prefix}
-        class="text-lg font-semibold text-white hover:text-slate-300 transition-colors"
+        class="text-xl font-bold tracking-tight text-slate-950 dark:text-white"
       >
         {AshAdmin.title()}
       </.link>
@@ -74,44 +74,47 @@ defmodule AshAdmin.Components.Sidebar do
     </div>
 
     <%!-- Domain/Resource navigation --%>
-    <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+    <nav class="flex-1 overflow-y-auto px-4 pb-4 space-y-5">
       <div :for={domain <- @domains}>
         <button
           type="button"
           phx-click="toggle_domain"
           phx-value-domain={AshAdmin.Domain.name(domain)}
           phx-target={@myself}
-          class="w-full flex items-center justify-between px-2 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+          aria-expanded={to_string(domain_expanded?(@expanded_domains, domain))}
+          class="w-full flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
         >
           <span>{AshAdmin.Domain.name(domain)}</span>
           <AshAdmin.CoreComponents.icon
             name={
               if domain_expanded?(@expanded_domains, domain),
-                do: "hero-chevron-down-mini",
-                else: "hero-chevron-right-mini"
+                do: "hero-chevron-up-mini",
+                else: "hero-chevron-down-mini"
             }
-            class="h-4 w-4 text-slate-500"
+            class="h-4 w-4 text-slate-400 dark:text-slate-500"
           />
         </button>
 
-        <div :if={domain_expanded?(@expanded_domains, domain)} class="ml-2 space-y-0.5 mt-0.5">
+        <div :if={domain_expanded?(@expanded_domains, domain)} class="mt-1 space-y-0.5">
           <% groups = DropdownHelper.dropdown_groups(@prefix, @resource, domain) %>
           <% group_labels = DropdownHelper.dropdown_group_labels(domain) %>
           <div :for={{group, group_index} <- Enum.with_index(groups)}>
             <div
               :if={group_label(group, group_index, group_labels)}
-              class="px-2 pt-2 pb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+              class="px-3 pt-3 pb-1 text-xs font-medium text-slate-400 dark:text-slate-500"
             >
               {group_label(group, group_index, group_labels)}
             </div>
             <.link
               :for={item <- group}
               navigate={item.to}
+              aria-current={item.active && "page"}
               class={[
-                "block px-3 py-1.5 text-sm rounded-md transition-colors",
+                "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 if(item.active,
-                  do: "bg-slate-700 text-white font-medium",
-                  else: "text-slate-400 hover:text-white hover:bg-slate-800"
+                  do: "bg-slate-200/60 text-primary-600 dark:bg-white/5 dark:text-primary-400",
+                  else:
+                    "text-slate-700 hover:bg-slate-200/40 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
                 )
               ]}
             >
@@ -123,7 +126,7 @@ defmodule AshAdmin.Components.Sidebar do
     </nav>
 
     <%!-- Status Panel --%>
-    <div class="border-t border-slate-700/50 px-3 py-3 space-y-2">
+    <div class="border-t border-slate-200/70 dark:border-white/5 px-6 py-4 space-y-3">
       <%!-- Actor --%>
       <div
         :if={@actor_resources != []}
@@ -132,7 +135,7 @@ defmodule AshAdmin.Components.Sidebar do
         class="space-y-1.5"
       >
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actor</span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Actor</span>
         </div>
         <div :if={@actor} class="flex items-center gap-2 text-sm">
           <button
@@ -147,16 +150,16 @@ defmodule AshAdmin.Components.Sidebar do
           >
             <span class={[
               "inline-block h-2.5 w-2.5 rounded-full transition-colors",
-              if(@actor_paused, do: "bg-slate-500", else: "bg-emerald-400")
+              if(@actor_paused, do: "bg-slate-400", else: "bg-emerald-500")
             ]} />
           </button>
-          <span class="text-slate-300 truncate" title={user_display(@actor, @actor_tenant)}>
+          <span class="text-slate-700 dark:text-slate-300 truncate" title={user_display(@actor, @actor_tenant)}>
             {user_display(@actor, @actor_tenant)}
           </span>
           <button
             type="button"
             phx-click="clear_actor"
-            class="flex-shrink-0 text-slate-500 hover:text-slate-300"
+            class="flex-shrink-0 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             title="Clear actor"
           >
             <AshAdmin.CoreComponents.icon name="hero-x-mark-mini" class="h-4 w-4" />
@@ -167,7 +170,7 @@ defmodule AshAdmin.Components.Sidebar do
           <span :for={{domain, resource} <- @actor_resources} class="ml-1">
             <.link
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
-              class="text-slate-400 hover:text-white underline"
+              class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
             >
               Set {AshAdmin.Resource.name(resource)}
             </.link>
@@ -184,9 +187,9 @@ defmodule AshAdmin.Components.Sidebar do
         >
           <span class={[
             "inline-block h-2.5 w-2.5 rounded-full transition-colors",
-            if(@authorizing, do: "bg-emerald-400", else: "bg-slate-500")
+            if(@authorizing, do: "bg-emerald-500", else: "bg-slate-400")
           ]} />
-          <span class={if(@authorizing, do: "text-slate-300", else: "text-slate-500")}>
+          <span class={if(@authorizing, do: "text-slate-700 dark:text-slate-300", else: "text-slate-500")}>
             {if @authorizing, do: "Auth enforced", else: "Auth bypassed"}
           </span>
         </button>
@@ -200,7 +203,7 @@ defmodule AshAdmin.Components.Sidebar do
         class="relative"
       >
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tenant</span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Tenant</span>
         </div>
         {render_tenant(assigns)}
       </div>
@@ -214,7 +217,7 @@ defmodule AshAdmin.Components.Sidebar do
       <.form for={to_form(%{}, as: :tenant)} phx-change="set_tenant">
         <select
           name="tenant"
-          class="w-full text-sm rounded-md bg-slate-800 border-slate-700 text-slate-300 focus:border-slate-500 focus:ring-slate-500"
+          class="aa-input"
         >
           <option value="">No tenant</option>
           <option :for={t <- @tenant_options} value={t.value} selected={t.value == @tenant}>
@@ -240,7 +243,7 @@ defmodule AshAdmin.Components.Sidebar do
             :if={@tenant_suggestions != []}
             id={"tenant-suggestions-#{@variant}"}
             phx-hook="PositionAbove"
-            class="fixed z-50 bg-slate-800 border border-slate-700 rounded-md shadow-lg max-h-40 overflow-auto"
+            class="aa-menu fixed z-50 max-h-40 overflow-auto"
           >
             <li :for={s <- @tenant_suggestions}>
               <button
@@ -248,7 +251,7 @@ defmodule AshAdmin.Components.Sidebar do
                 phx-click="set_tenant"
                 phx-value-tenant={s.value}
                 phx-value-tenant_label={s.label}
-                class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 cursor-pointer"
+                class="aa-menu-item cursor-pointer"
               >
                 {s.label}
               </button>
@@ -259,7 +262,7 @@ defmodule AshAdmin.Components.Sidebar do
               type="text"
               name="tenant"
               value={@tenant}
-              class="w-full text-sm rounded-md bg-slate-800 border-slate-700 text-slate-300 focus:border-slate-500 focus:ring-slate-500"
+              class="aa-input"
               phx-debounce="300"
               autocomplete="off"
             />
@@ -268,7 +271,7 @@ defmodule AshAdmin.Components.Sidebar do
               phx-click={
                 Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-typeahead-form-#{@variant}")
               }
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary-600"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />
             </button>
@@ -276,14 +279,14 @@ defmodule AshAdmin.Components.Sidebar do
         </.form>
       </div>
       <div :if={!@editing_tenant} class="flex items-center gap-2 text-sm">
-        <a href="#" phx-click="start_editing_tenant" class="text-slate-400 hover:text-white">
+        <a href="#" phx-click="start_editing_tenant" class="text-slate-700 hover:text-primary-600 dark:text-slate-300 dark:hover:text-primary-400">
           {tenant_display(assigns)}
         </a>
         <button
           :if={@tenant}
           type="button"
           phx-click="clear_tenant"
-          class="text-slate-500 hover:text-slate-300"
+          class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
         >
           <AshAdmin.CoreComponents.icon name="hero-x-mark-mini" class="h-4 w-4" />
         </button>
@@ -302,12 +305,12 @@ defmodule AshAdmin.Components.Sidebar do
               type="text"
               name="tenant"
               value={@tenant}
-              class="flex-1 text-sm rounded-md bg-slate-800 border-slate-700 text-slate-300 focus:border-slate-500 focus:ring-slate-500"
+              class="aa-input flex-1"
             />
             <button
               type="button"
               phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-form-#{@variant}")}
-              class="text-slate-400 hover:text-white"
+              class="text-slate-400 hover:text-primary-600"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />
             </button>
@@ -315,14 +318,14 @@ defmodule AshAdmin.Components.Sidebar do
         </.form>
       </div>
       <div :if={!@editing_tenant} class="flex items-center gap-2 text-sm">
-        <a href="#" phx-click="start_editing_tenant" class="text-slate-400 hover:text-white">
+        <a href="#" phx-click="start_editing_tenant" class="text-slate-700 hover:text-primary-600 dark:text-slate-300 dark:hover:text-primary-400">
           {tenant_display(assigns)}
         </a>
         <button
           :if={@tenant}
           type="button"
           phx-click="clear_tenant"
-          class="text-slate-500 hover:text-slate-300"
+          class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
         >
           <AshAdmin.CoreComponents.icon name="hero-x-mark-mini" class="h-4 w-4" />
         </button>

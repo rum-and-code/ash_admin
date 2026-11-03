@@ -31,10 +31,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
       <div>
         <div
           :if={@action.arguments != []}
-          class="mx-4 md:mx-16 mt-4 md:mt-6"
+          class="mx-4 md:mx-8 mt-4 md:mt-6"
         >
           <div
-            class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900"
+            class="aa-card overflow-hidden"
             style="max-width: 42rem;"
           >
             <div class="px-6 py-6">
@@ -56,7 +56,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 <div class="py-3 text-right">
                   <button
                     type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+                    class="aa-btn-primary"
                   >
                     Run Query
                   </button>
@@ -66,7 +66,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </div>
         </div>
 
-        <div :if={@tables != []} class="mx-4 md:mx-16 mt-4 md:mt-6">
+        <div :if={@tables != []} class="mx-4 md:mx-8 mt-4 md:mt-6">
           <div class="px-6 py-4">
             <AshAdmin.Components.Resource.SelectTable.table
               resource={@resource}
@@ -82,15 +82,19 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
         <div
           :if={@action.arguments == [] || @params["args"]}
-          class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-6"
+          class="h-full overflow-auto mx-4 md:mx-8 mt-4 md:mt-6"
         >
-          <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900">
-            <div class="px-2">
-              <div :if={@ash_query && @has_filters} class="px-6 pt-6">
+          <div class="aa-card overflow-auto">
+            <div>
+              <div
+                :if={@ash_query && @has_filters}
+                class="flex justify-end px-6 py-3 border-b border-slate-200 dark:border-white/10"
+              >
                 <button
                   phx-click="toggle_filters"
                   phx-target={@myself}
-                  class="inline-flex items-center gap-2 py-2 px-4 border border-slate-300 dark:border-slate-600 text-sm font-medium rounded-md text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+                  aria-pressed={to_string(@show_filters)}
+                  class="aa-btn-secondary"
                 >
                   <AshAdmin.CoreComponents.icon
                     name={if @show_filters, do: "hero-funnel-solid", else: "hero-funnel"}
@@ -181,7 +185,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
     <div class="relative flex justify-end" phx-click={JS.toggle(to: "##{@id}")}>
       <button
         type="button"
-        class="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800"
+        class="rounded-md p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-slate-200"
         title="Actions"
         aria-label="Actions"
       >
@@ -189,7 +193,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
       </button>
       <div
         id={@id}
-        class="hidden absolute right-0 top-full mt-1 w-48 text-left bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
+        class="aa-menu hidden absolute right-0 top-full mt-1 w-48 text-left"
         phx-click-away={JS.hide(to: "##{@id}")}
       >
         <.link
@@ -225,7 +229,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         </button>
         <div
           :if={@destroy_actions != []}
-          class="my-1 border-t border-slate-200 dark:border-slate-700"
+          class="my-1 border-t border-slate-100 dark:border-white/5"
         />
         <.link
           :for={action <- @destroy_actions}
@@ -240,7 +244,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   defp row_menu_item_class do
-    "block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+    "aa-menu-item"
   end
 
   def mount(socket) do

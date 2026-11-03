@@ -43,17 +43,18 @@ defmodule AshAdmin.Components.PageHeader do
       |> assign(:title, title(assigns))
 
     ~H"""
-    <div class="mx-4 md:mx-16 pt-4 md:pt-8">
+    <div class="mx-4 md:mx-8 pt-6 md:pt-8">
       <.breadcrumb :if={@breadcrumb != []} items={@breadcrumb} />
-      <div class="mt-2 flex flex-wrap items-center gap-3">
+      <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
         <button
           type="button"
           phx-click="toggle_sidebar"
-          class="md:hidden -ml-1 p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          class="md:hidden -ml-1.5 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200"
+          aria-label="Open navigation"
         >
           <AshAdmin.CoreComponents.icon name="hero-bars-3" class="h-5 w-5" />
         </button>
-        <h1 class="text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-100 truncate">
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-950 dark:text-white truncate">
           {@title}
         </h1>
         <div class="flex-1" />
@@ -181,7 +182,7 @@ defmodule AshAdmin.Components.PageHeader do
           <.link
             :if={path}
             navigate={path}
-            class="hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            class="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
           >
             {label}
           </.link>
@@ -234,38 +235,22 @@ defmodule AshAdmin.Components.PageHeader do
     """
   end
 
-  defp button_class(:primary) do
-    "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 text-white dark:text-slate-900 transition-colors"
-  end
+  defp button_class(:primary), do: "aa-btn-primary"
 
-  defp button_class(:secondary) do
-    "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 ring-1 ring-slate-300 dark:ring-slate-700 transition-colors"
-  end
+  defp button_class(:secondary), do: "aa-btn-secondary"
 
-  defp button_class(:danger) do
-    "inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-rose-600 hover:bg-rose-500 text-white transition-colors"
-  end
+  defp button_class(:danger), do: "aa-btn-danger"
 
-  defp menu_class do
-    "bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
-  end
+  defp menu_class, do: "aa-menu"
 
-  defp menu_item_class(true),
-    do:
-      "block px-3 py-1.5 text-sm bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-
-  defp menu_item_class(false),
-    do:
-      "block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+  defp menu_item_class(true), do: "aa-menu-item-active"
+  defp menu_item_class(false), do: "aa-menu-item"
 
   # Small header toggles for the read action and the generic actions.
   defp toggle_class(active?) do
     [
-      "inline-flex items-center gap-1 px-2.5 py-1 text-sm rounded-md transition-colors",
-      if(active?,
-        do: "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium",
-        else: "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-      )
+      "aa-btn-ghost",
+      active? && "bg-slate-100 text-slate-900 dark:bg-white/5 dark:text-slate-100"
     ]
   end
 
