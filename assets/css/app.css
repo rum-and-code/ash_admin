@@ -9,6 +9,91 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* Browser surfaces: selection, native controls, scrollbars */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    accent-color: theme("colors.primary.600");
+  }
+
+  ::selection {
+    background-color: theme("colors.primary.100");
+    color: theme("colors.primary.950");
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.slate.300") transparent;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html {
+      accent-color: theme("colors.primary.500");
+    }
+
+    ::selection {
+      background-color: theme("colors.primary.500 / 0.35");
+      color: theme("colors.white");
+    }
+
+    * {
+      scrollbar-color: theme("colors.slate.700") transparent;
+    }
+  }
+}
+
+/* Shared building blocks used across the shell, tables, show pages and forms */
+@layer components {
+  .aa-card {
+    @apply rounded-xl bg-white shadow-sm ring-1 ring-slate-950/5 dark:bg-slate-900 dark:ring-white/10;
+  }
+
+  .aa-btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold leading-5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-500 dark:focus-visible:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .aa-btn-primary {
+    @apply aa-btn bg-primary-600 text-white shadow-sm hover:bg-primary-500 dark:bg-primary-500 dark:hover:bg-primary-400;
+  }
+
+  .aa-btn-secondary {
+    @apply aa-btn bg-white text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:bg-white/5 dark:text-slate-200 dark:ring-white/10 dark:hover:bg-white/10;
+  }
+
+  .aa-btn-danger {
+    @apply aa-btn bg-rose-600 text-white shadow-sm hover:bg-rose-500;
+  }
+
+  .aa-btn-ghost {
+    @apply aa-btn text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-100;
+  }
+
+  .aa-input {
+    @apply block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm leading-5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-white/5 dark:text-slate-100 dark:ring-white/10 dark:placeholder:text-slate-500 dark:focus:ring-primary-500;
+  }
+
+  .aa-label {
+    @apply block text-sm font-medium leading-6 text-slate-900 dark:text-slate-100;
+  }
+
+  .aa-menu {
+    @apply z-30 rounded-lg bg-white py-1 shadow-lg ring-1 ring-slate-950/5 dark:bg-slate-800 dark:ring-white/10;
+  }
+
+  .aa-menu-item {
+    @apply flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-slate-100;
+  }
+
+  .aa-menu-item-active {
+    @apply aa-menu-item bg-slate-50 font-medium text-primary-600 dark:bg-white/5 dark:text-primary-400;
+  }
+
+  .aa-badge {
+    @apply inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+  }
+}
+
 /* Ensure LiveView wrapper divs pass through full height */
 [data-phx-main], [data-phx-session] {
   height: 100%;

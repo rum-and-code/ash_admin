@@ -160,7 +160,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
             data-target-id={"#{@id}-hidden"}
             value={@current_label}
             name={"#{@id}-suggest"}
-            class="mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 border-zinc-300 focus:border-zinc-400 pr-9"
+            class="aa-input mt-2 pr-9"
             phx-keyup="suggest"
             phx-debounce="300"
             phx-target={@myself}
@@ -197,7 +197,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
           :if={Enum.count(@suggestions) > 0}
           id={"#{@id}-listbox"}
           role="listbox"
-          class="absolute z-10 mt-1 bg-white dark:bg-slate-800 shadow-lg rounded-md px-2 py-1 text-base ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto focus:outline-none sm:text-sm"
+          class="aa-menu absolute mt-1 overflow-auto px-1 text-sm focus:outline-none"
           phx-update="replace"
         >
           <%= for {{suggestion_name, suggestion_id}, index} <- Enum.with_index(@suggestions) do %>
@@ -207,9 +207,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
               class={[
                 "cursor-pointer select-none relative py-2 px-2 w-full truncate",
                 if(index == @highlighted_index,
-                  do: "text-white bg-slate-700 dark:bg-slate-500",
+                  do: "text-white bg-primary-600 dark:bg-primary-500",
                   else:
-                    "text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    "text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-white/5"
                 )
               ]}
               role="option"
