@@ -221,7 +221,11 @@ defmodule AshAdmin.Components.Sidebar do
   defp render_tenant(%{tenant_mode: :dropdown} = assigns) do
     ~H"""
     <div class="mt-1">
-      <.form for={to_form(%{}, as: :tenant)} phx-change="set_tenant">
+      <.form
+        for={to_form(%{}, as: :tenant)}
+        phx-change="set_tenant"
+        id={"tenant-select-form-#{@variant}"}
+      >
         <select
           name="tenant"
           class="aa-input"
