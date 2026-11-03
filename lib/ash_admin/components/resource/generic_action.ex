@@ -22,7 +22,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 md:px-8 pt-8 pb-8">
+    <div class="px-4 md:px-8 pt-6 pb-8">
       <%= if Enum.empty?(@action.arguments) do %>
         <div class="flex flex-col items-center">
           <.form

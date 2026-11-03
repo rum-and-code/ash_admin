@@ -27,10 +27,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="md:pt-10 sm:mt-0">
+      <div>
         <div
           :if={@action.arguments != []}
-          class="mx-4 md:mx-16 mt-4 md:mt-10"
+          class="mx-4 md:mx-16 mt-4 md:mt-6"
         >
           <div
             class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900"
@@ -66,7 +66,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </div>
         </div>
 
-        <div :if={@tables != []} class="mx-4 md:mx-16 mt-4 md:mt-10">
+        <div :if={@tables != []} class="mx-4 md:mx-16 mt-4 md:mt-6">
           <div class="px-6 py-4">
             <AshAdmin.Components.Resource.SelectTable.table
               resource={@resource}
@@ -82,7 +82,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
         <div
           :if={@action.arguments == [] || @params["args"]}
-          class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-10"
+          class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-6"
         >
           <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900">
             <div class="px-2">
