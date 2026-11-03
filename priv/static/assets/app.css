@@ -2537,6 +2537,11 @@ html {
   margin-right: 1rem;
 }
 
+.mx-6 {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -2712,10 +2717,6 @@ html {
   height: 2.5rem;
 }
 
-.h-16 {
-  height: 4rem;
-}
-
 .h-2 {
   height: 0.5rem;
 }
@@ -2795,6 +2796,10 @@ html {
 
 .min-h-\[42px\] {
   min-height: 42px;
+}
+
+.min-h-\[4rem\] {
+  min-height: 4rem;
 }
 
 .min-h-\[5rem\] {
@@ -4097,11 +4102,6 @@ html {
 .py-3 {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
-}
-
-.py-3\.5 {
-  padding-top: 0.875rem;
-  padding-bottom: 0.875rem;
 }
 
 .py-4 {
@@ -6499,6 +6499,14 @@ main.admin-main::after {
     border-bottom-right-radius: 0.5rem;
     border-bottom-left-radius: 0.5rem;
   }
+}
+
+.\[\&_\.cursor-pointer\]\:inline-flex .cursor-pointer {
+  display: inline-flex;
+}
+
+.\[\&_\.cursor-pointer\]\:items-center .cursor-pointer {
+  align-items: center;
 }
 
 .\[\&_table\]\:m-0 table {
