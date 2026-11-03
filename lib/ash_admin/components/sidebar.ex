@@ -56,7 +56,7 @@ defmodule AshAdmin.Components.Sidebar do
   defp render_sidebar_content(assigns) do
     ~H"""
     <%!-- Title --%>
-    <div class="flex h-16 shrink-0 items-center px-6">
+    <div class="flex min-h-[4rem] shrink-0 flex-col justify-center gap-1 px-6 py-4">
       <.link
         navigate={@prefix}
         class="text-xl font-bold tracking-tight text-slate-950 dark:text-white"
