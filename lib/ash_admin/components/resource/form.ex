@@ -130,9 +130,6 @@ defmodule AshAdmin.Components.Resource.Form do
           </li>
         </ul>
       </div>
-      <h1 class="text-lg mt-2 ml-4">
-        {String.capitalize(to_string(@action.type))} {AshAdmin.Resource.name(@resource)}
-      </h1>
       <div class="flex justify-between col-span-6 mr-4 mt-2 overflow-auto px-4">
         <AshAdmin.Components.Resource.SelectTable.table
           resource={@resource}
@@ -178,13 +175,26 @@ defmodule AshAdmin.Components.Resource.Form do
             type="hidden"
           />
           {render_attributes(assigns, @resource, @action, form)}
-          <div class="px-4 py-3 text-right sm:px-6">
+          <div class="flex items-center gap-2 px-4 py-3 sm:px-6">
             <button
               type="submit"
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+              class={[
+                "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2",
+                if(@type == :destroy,
+                  do: "text-white bg-rose-600 hover:bg-rose-500 focus:ring-rose-500",
+                  else:
+                    "text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:ring-slate-500"
+                )
+              ]}
             >
               {save_button_text(@type)}
             </button>
+            <.link
+              navigate={cancel_path(assigns)}
+              class="inline-flex justify-center py-2 px-4 shadow-sm text-sm font-medium rounded-md text-slate-700 dark:text-slate-200 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 ring-1 ring-slate-300 dark:ring-slate-700"
+            >
+              Cancel
+            </.link>
           </div>
         </.form>
       </div>
@@ -192,8 +202,33 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  defp save_button_text(:update), do: "Save"
+  defp save_button_text(:update), do: "Save changes"
   defp save_button_text(type), do: type |> to_string() |> String.capitalize()
+
+  # Back to the record's show page, or to the list when there is no record
+  # or no show action.
+  defp cancel_path(assigns) do
+    base = [
+      domain: AshAdmin.Domain.name(assigns.domain),
+      resource: AshAdmin.Resource.name(assigns.resource),
+      table: assigns[:table]
+    ]
+
+    case assigns[:record] do
+      %_{} = record when assigns.type in [:update, :destroy] ->
+        if AshAdmin.Resource.show_action(assigns.resource) do
+          admin_path(
+            assigns.prefix,
+            base ++ [primary_key: encode_primary_key(record), action_type: :read]
+          )
+        else
+          admin_path(assigns.prefix, base ++ [action_type: :read])
+        end
+
+      _ ->
+        admin_path(assigns.prefix, base ++ [action_type: :read])
+    end
+  end
 
   def render_attributes(
         assigns,

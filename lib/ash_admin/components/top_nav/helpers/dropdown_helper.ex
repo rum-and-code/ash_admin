@@ -17,7 +17,7 @@ defmodule AshAdmin.Components.TopNav.DropdownHelper do
     links =
       for resource <- AshAdmin.Domain.show_resources(domain) do
         %{
-          text: AshAdmin.Resource.name(resource),
+          text: AshAdmin.Resource.plural_name(resource),
           to:
             "#{prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}",
           active: resource == current_resource,
