@@ -128,6 +128,17 @@ defmodule Demo.Tickets.Ticket do
       change manage_relationship(:comments, :comments, type: :direct_control)
     end
 
+    # `organization_id` has `resource: Demo.Tickets.Organization` in the admin
+    # form section, so it renders as a relationship select, not a UUID input.
+    update :transfer do
+      description "Move the ticket to another organization."
+      accept []
+      require_atomic? false
+      argument :organization_id, :uuid, allow_nil?: false
+
+      change set_attribute(:organization_id, arg(:organization_id))
+    end
+
     update :assign do
       accept []
       require_atomic? false
