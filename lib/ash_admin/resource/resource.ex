@@ -12,11 +12,32 @@ defmodule AshAdmin.Resource do
     args: [:name]
   }
 
+  @form_action %Spark.Dsl.Entity{
+    describe: """
+    Configure fields for one action only. A field declared here replaces the
+    form-level field of the same name when the form is for this action.
+    """,
+    examples: [
+      """
+      action :apply_coupon do
+        field :coupon_id, resource: MyApp.Coupon
+      end
+      """
+    ],
+    name: :action,
+    schema: AshAdmin.Resource.FormAction.schema(),
+    target: AshAdmin.Resource.FormAction,
+    args: [:name],
+    identifier: :name,
+    entities: [fields: [@field]]
+  }
+
   @form %Spark.Dsl.Section{
     describe: "Configure the appearance of fields in admin forms.",
     name: :form,
     entities: [
-      @field
+      @field,
+      @form_action
     ]
   }
 
@@ -141,7 +162,8 @@ defmodule AshAdmin.Resource do
     ],
     verifiers: [
       AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist,
-      AshAdmin.Resource.Verifiers.VerifyFieldResources
+      AshAdmin.Resource.Verifiers.VerifyFieldResources,
+      AshAdmin.Resource.Verifiers.VerifyFormActions
     ]
 
   @moduledoc """
@@ -267,17 +289,46 @@ defmodule AshAdmin.Resource do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :show_calculations, [], true)
   end
 
+  @doc "The fields declared at the form level, which apply to every action."
   def fields(resource) do
-    Spark.Dsl.Extension.get_entities(resource, [:admin, :form])
+    resource
+    |> Spark.Dsl.Extension.get_entities([:admin, :form])
+    |> Enum.filter(&match?(%AshAdmin.Resource.Field{}, &1))
   end
 
-  def field(resource, name) do
+  @doc "The `action` blocks declared in the form section."
+  def form_actions(resource) do
     resource
-    |> fields()
-    |> Enum.find(fn field ->
-      field.name == name
-    end)
+    |> Spark.Dsl.Extension.get_entities([:admin, :form])
+    |> Enum.filter(&match?(%AshAdmin.Resource.FormAction{}, &1))
   end
+
+  @doc """
+  The field configuration for `name`. When `action` is given (an action name or
+  struct) and that action has an `action` block with a field of this name, that
+  field is returned. Otherwise the form-level field is returned.
+  """
+  def field(resource, name, action \\ nil) do
+    action_field(resource, name, action) ||
+      Enum.find(fields(resource), &(&1.name == name))
+  end
+
+  defp action_field(_resource, _name, nil), do: nil
+
+  defp action_field(resource, name, %{name: action_name}),
+    do: action_field(resource, name, action_name)
+
+  defp action_field(resource, name, action_name) when is_atom(action_name) do
+    resource
+    |> form_actions()
+    |> Enum.find(&(&1.name == action_name))
+    |> case do
+      nil -> nil
+      form_action -> Enum.find(form_action.fields, &(&1.name == name))
+    end
+  end
+
+  defp action_field(_resource, _name, _action), do: nil
 
   def table_sortable_columns(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :table_sortable_columns, nil, true)
