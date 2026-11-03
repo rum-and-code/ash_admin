@@ -153,29 +153,10 @@ defmodule AshAdmin.Components.PageHeader do
   end
 
   defp read_action_switcher(assigns) do
+    # With a single read action, the breadcrumb already links to the list.
     case get_read_actions(assigns.resource) do
-      [] ->
+      read_actions when length(read_actions) < 2 ->
         ~H""
-
-      [single] ->
-        assigns = assign(assigns, :single, single)
-
-        ~H"""
-        <div class="relative">
-          <.link
-            navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read&action=#{@single.name}&table=#{@table}"}
-            class={[
-              "inline-flex items-center px-2.5 py-1 text-sm rounded-md transition-colors",
-              if(@action && @action.type == :read,
-                do: "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium",
-                else: "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              )
-            ]}
-          >
-            {action_label(@single)}
-          </.link>
-        </div>
-        """
 
       read_actions ->
         assigns = assign(assigns, :read_actions, read_actions)
