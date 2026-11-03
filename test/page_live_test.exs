@@ -179,25 +179,61 @@ defmodule AshAdmin.Test.PageLiveTest do
   end
 
   describe "page header" do
-    test "the read page shows the read action in the breadcrumb and the actions above the table",
+    @crumb "main nav[aria-label=Breadcrumb]"
+
+    test "the read page shows the resource and the read action, without the top bar",
          %{conn: conn} do
       {:ok, view, _html} =
         live(conn, "/api/admin?domain=Test&resource=Post&action_type=read")
 
       refute has_element?(view, "header")
-      assert has_element?(view, "main nav[aria-label=Breadcrumb] a", "Read")
+      assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
+      assert has_element?(view, "#{@crumb} li:last-child span", "Read")
       assert has_element?(view, "main h1", "Post")
       assert has_element?(view, "main a, main button", "New")
     end
 
-    test "the other pages add their action after the read action", %{conn: conn} do
+    test "the create page shows the resource and the action", %{conn: conn} do
       {:ok, view, _html} =
         live(conn, "/api/admin?domain=Test&resource=Post&action_type=create")
 
-      refute has_element?(view, "header")
-      assert has_element?(view, "main nav[aria-label=Breadcrumb] li:first-child a", "Read")
-      assert has_element?(view, "main nav[aria-label=Breadcrumb] li:last-child span", "Create")
-      assert has_element?(view, "main h1", "Post")
+      assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
+      assert has_element?(view, "#{@crumb} li:last-child span", "Create")
+    end
+
+    test "a record page shows the resource and the record id", %{conn: conn} do
+      post =
+        AshAdmin.Test.Post
+        |> Ash.Changeset.for_create(:create, %{body: "crumb post"})
+        |> Ash.create!()
+
+      pkey = AshAdmin.Helpers.encode_primary_key(post)
+
+      {:ok, view, _html} =
+        live(conn, "/api/admin?domain=Test&resource=Post&action_type=read&primary_key=#{pkey}")
+
+      assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
+      assert has_element?(view, "#{@crumb} li:last-child span", to_string(post.id))
+    end
+
+    test "an update page links back to the record", %{conn: conn} do
+      profile =
+        AshAdmin.Test.Profile
+        |> Ash.Changeset.for_create(:create, %{name: "crumb profile"})
+        |> Ash.create!()
+
+      domain = AshAdmin.Domain.name(AshAdmin.Test.ManyToManyDomain)
+      pkey = AshAdmin.Helpers.encode_primary_key(profile)
+
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/api/admin?domain=#{domain}&resource=Profile&action_type=update&primary_key=#{pkey}"
+        )
+
+      assert has_element?(view, "#{@crumb} li:first-child a", "Profiles")
+      assert has_element?(view, "#{@crumb} li:nth-child(2) a", to_string(profile.id))
+      assert has_element?(view, "#{@crumb} li:last-child span", "Update")
     end
   end
 

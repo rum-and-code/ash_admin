@@ -53,8 +53,8 @@ defmodule AshAdmin.Components.PageHeader do
     """
   end
 
-  # The first item is always the read (list) action. Other pages add their own
-  # action, or "Show" for a record opened from the list.
+  # Resource (plural) > record primary key > current action.
+  # The list page ends with its read action instead of a record.
   defp breadcrumb_items(%{resource: nil}), do: []
 
   defp breadcrumb_items(assigns) do
@@ -65,20 +65,55 @@ defmodule AshAdmin.Components.PageHeader do
         assigns.resource |> get_read_actions() |> List.first()
       end
 
-    list_item =
-      if list_action,
-        do: [{action_label(list_action), read_action_path(assigns, list_action)}],
-        else: []
+    resource_item = {
+      assigns.resource |> AshAdmin.Resource.name() |> pluralize(),
+      list_action && read_action_path(assigns, list_action)
+    }
 
-    current_item =
-      cond do
-        is_nil(assigns.action) -> []
-        assigns.action.type == :read and match?({:ok, %_{}}, assigns.record) -> [{"Show", nil}]
-        assigns.action.type == :read -> []
-        true -> [{action_label(assigns.action), nil}]
+    record =
+      case assigns.record do
+        {:ok, %_{} = record} -> record
+        _ -> nil
       end
 
-    list_item ++ current_item
+    action = assigns.action
+
+    rest =
+      cond do
+        is_nil(action) ->
+          []
+
+        record && action.type == :read ->
+          [{record_label(record), nil}]
+
+        record ->
+          [{record_label(record), show_path(assigns, record)}, {action_label(action), nil}]
+
+        true ->
+          [{action_label(action), nil}]
+      end
+
+    [resource_item | rest]
+  end
+
+  defp record_label(record) do
+    record.__struct__
+    |> Ash.Resource.Info.primary_key()
+    |> Enum.map_join(", ", &to_string(Map.get(record, &1)))
+  end
+
+  defp show_path(assigns, record) do
+    "#{assigns.prefix}?domain=#{AshAdmin.Domain.name(assigns.domain)}&resource=#{AshAdmin.Resource.name(assigns.resource)}&table=#{assigns.table}&primary_key=#{AshAdmin.Helpers.encode_primary_key(record)}&action_type=read"
+  end
+
+  # Simple English plural for the breadcrumb: "User" -> "Users",
+  # "Category" -> "Categories", "Address" -> "Addresses".
+  defp pluralize(name) do
+    cond do
+      Regex.match?(~r/[^aeiou]y$/i, name) -> String.slice(name, 0..-2//1) <> "ies"
+      Regex.match?(~r/(s|x|z|ch|sh)$/i, name) -> name <> "es"
+      true -> name <> "s"
+    end
   end
 
   attr :items, :list,
