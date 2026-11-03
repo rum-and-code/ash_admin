@@ -181,7 +181,7 @@ defmodule AshAdmin.Test.PageLiveTest do
   describe "page header" do
     @crumb "main nav[aria-label=Breadcrumb]"
 
-    test "the list page shows the plural resource, the list and the create button",
+    test "the list page shows the plural resource, the list and the actions menu",
          %{conn: conn} do
       {:ok, view, _html} =
         live(conn, "/api/admin?domain=Test&resource=Post&action_type=read")
@@ -190,9 +190,11 @@ defmodule AshAdmin.Test.PageLiveTest do
       assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
       assert has_element?(view, "#{@crumb} li:last-child span", "List")
       assert has_element?(view, "main h1", "Posts")
-      assert has_element?(view, "main a, main button", "New")
-      # A single read action needs no switcher: the breadcrumb links to the list.
-      refute has_element?(view, "main a", ~r/^\s*Read\s*$/)
+      assert has_element?(view, "main button", "Actions")
+      assert has_element?(view, "#actions-dropdown a[href*='action_type=create']", "Create")
+      # Without a record, the menu has no update or destroy section.
+      refute has_element?(view, "#actions-dropdown a[href*='action_type=update']")
+      refute has_element?(view, "#actions-dropdown a[href*='action_type=destroy']")
     end
 
     test "the create page shows the resource and the action", %{conn: conn} do
@@ -226,7 +228,7 @@ defmodule AshAdmin.Test.PageLiveTest do
       refute has_element?(view, "main a", "New")
     end
 
-    test "the show page links to update when the resource has an update action",
+    test "the show page actions menu links to update and destroy for the record",
          %{conn: conn} do
       profile =
         AshAdmin.Test.Profile
@@ -248,7 +250,10 @@ defmodule AshAdmin.Test.PageLiveTest do
                "Update"
              )
 
-      refute has_element?(view, "main a[href*='action_type=destroy']")
+      assert has_element?(
+               view,
+               "#actions-dropdown a[href*='action_type=destroy'][href*='primary_key=#{pkey}']"
+             )
     end
 
     test "the update page links back to the record and to destroy", %{conn: conn} do
