@@ -33747,6 +33747,7 @@ ${text}</tr>
           }, { signal });
           break;
         case "LI":
+        case "BUTTON":
           this.el.addEventListener("click", (e) => {
             window.setTimeout(function() {
               target_el.dispatchEvent(new Event("input", { bubbles: true }));

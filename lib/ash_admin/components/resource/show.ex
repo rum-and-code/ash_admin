@@ -77,16 +77,14 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
-  # Submits the calculation form from an icon at the end of the value box.
+  # Submits the calculation form from a labelled button at the end of the value box.
   defp calculate_button(assigns) do
     ~H"""
     <button
       type="submit"
-      title={@label}
-      aria-label={@label}
       data-calculate
-      class="flex-none rounded text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
-      style="padding: 0.125rem; margin: -0.125rem 0;"
+      class="inline-flex flex-none items-center gap-1 rounded px-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
+      style="padding-top: 0.125rem; padding-bottom: 0.125rem; margin: -0.125rem 0;"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -105,6 +103,7 @@ defmodule AshAdmin.Components.Resource.Show do
           stroke-width="2"
         />
       </svg>
+      <span>{@label}</span>
     </button>
     """
   end
@@ -184,10 +183,10 @@ defmodule AshAdmin.Components.Resource.Show do
 
     ~H"""
     <div :if={@active}>
-      <div class="flex justify-center mb-4">
+      <div :if={length(@relationships) > 1} class="mb-4 flex max-w-full justify-start overflow-x-auto">
         <nav
           role="tablist"
-          class="inline-flex flex-wrap gap-1 p-1 rounded-lg bg-neutral-100 dark:bg-white/5"
+          class="inline-flex h-9 items-center rounded-lg bg-neutral-100 p-[3px] text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
         >
           <button
             :for={relationship <- @relationships}
@@ -200,11 +199,10 @@ defmodule AshAdmin.Components.Resource.Show do
             phx-target={@myself}
             class={
               classes([
-                "px-3 py-1.5 text-sm font-medium rounded-md",
-                "bg-white text-neutral-900 shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-800 dark:text-neutral-100 dark:ring-white/10":
+                "inline-flex h-full items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400/50",
+                "bg-white text-neutral-950 shadow-sm dark:bg-neutral-950 dark:text-neutral-50":
                   relationship.name == @active.name,
-                "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200":
-                  relationship.name != @active.name
+                "hover:text-neutral-950 dark:hover:text-neutral-50": relationship.name != @active.name
               ])
             }
           >
@@ -229,6 +227,16 @@ defmodule AshAdmin.Components.Resource.Show do
             type="button"
             class="aa-btn-primary"
           >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+              class="h-4 w-4"
+            >
+              <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+              <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+            </svg>
             Load
           </button>
           <button
@@ -507,7 +515,7 @@ defmodule AshAdmin.Components.Resource.Show do
       class={
         classes([
           @value_box_class,
-          "flex items-start justify-between gap-2": @field_button,
+          "flex items-center justify-between gap-2": !!@field_button,
           "whitespace-pre-wrap min-h-[5rem]": @long
         ])
       }
@@ -776,17 +784,26 @@ defmodule AshAdmin.Components.Resource.Show do
     case Map.get(record, name) do
       true ->
         ~H"""
-        <.icon name="hero-check" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+        <span class="inline-flex items-center gap-1.5">
+          <.icon name="hero-check" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+          <span>Yes</span>
+        </span>
         """
 
       false ->
         ~H"""
-        <.icon name="hero-x-mark" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+        <span class="inline-flex items-center gap-1.5">
+          <.icon name="hero-x-mark" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+          <span>No</span>
+        </span>
         """
 
       _ ->
         ~H"""
-        <.icon name="hero-minus" class="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+        <span class="inline-flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+          <.icon name="hero-minus" class="h-4 w-4" />
+          <span>Not set</span>
+        </span>
         """
     end
   end

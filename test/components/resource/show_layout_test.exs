@@ -51,10 +51,11 @@ defmodule AshAdmin.Test.Components.Resource.ShowLayoutTest do
   end
 
   describe "calculations" do
-    test "render as an empty box with a calculate icon", %{view: view} do
+    test "render as an empty box with a calculate button", %{view: view} do
       assert has_element?(
                view,
-               ~s|#calculation-full_name button[type=submit][aria-label="Calculate"]|
+               ~s|#calculation-full_name button[type=submit][data-calculate]|,
+               "Calculate"
              )
 
       refute has_element?(view, ~s|#calculation-full_name div[data-field="full_name"]|)
@@ -78,7 +79,8 @@ defmodule AshAdmin.Test.Components.Resource.ShowLayoutTest do
 
       assert has_element?(
                view,
-               ~s|#calculation-greeting div[data-field="greeting"] button[type=submit][aria-label="Recalculate"]|
+               ~s|#calculation-greeting div[data-field="greeting"] button[type=submit][data-calculate]|,
+               "Recalculate"
              )
     end
   end

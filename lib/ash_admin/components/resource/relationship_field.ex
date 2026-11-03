@@ -146,11 +146,12 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
       <div
         :if={@field_type == :typeahead}
         id={@id}
-        class="autocomplete-combobox"
+        class="autocomplete-combobox relative"
         role="combobox"
         aria-haspopup="listbox"
         aria-owns={"#{@id}-listbox"}
         aria-expanded={if @suggestions != [], do: "true", else: "false"}
+        phx-click-away={@suggestions != [] && JS.push("close", target: @myself)}
       >
         <!-- Visible Input Field -->
         <div class="relative">
@@ -161,6 +162,8 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
             value={@current_label}
             name={"#{@id}-suggest"}
             class="aa-input mt-2 pr-9"
+            placeholder={"Select #{@label}"}
+            phx-click="open"
             phx-keyup="suggest"
             phx-debounce="300"
             phx-target={@myself}
@@ -173,17 +176,27 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
             autocomplete="off"
           />
           <button
+            :if={@selected_id not in [nil, ""] or @current_label != ""}
             type="button"
             class="absolute inset-y-0 right-0 pr-2 flex items-center"
-            data-target-id={"#{@id}-input"}
+            aria-label={"Clear #{@label}"}
+            data-target-id={"#{@id}-hidden"}
             phx-click="clear"
             phx-target={@myself}
+            phx-hook="Typeahead"
+            id={"#{@id}-clear"}
           >
             <.icon
               name="hero-x-circle"
               class="h-5 w-5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
             />
           </button>
+          <span
+            :if={@selected_id in [nil, ""] and @current_label == ""}
+            class="pointer-events-none absolute inset-y-0 right-0 pr-2 flex items-center"
+          >
+            <.icon name="hero-chevron-up-down" class="h-5 w-5 text-neutral-400" />
+          </span>
         </div>
         <!-- Hidden Input Field -->
         <input
@@ -197,7 +210,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
           :if={Enum.count(@suggestions) > 0}
           id={"#{@id}-listbox"}
           role="listbox"
-          class="aa-menu absolute mt-1 overflow-auto px-1 text-sm focus:outline-none"
+          class="aa-menu absolute inset-x-0 top-full mt-1 max-h-60 overflow-auto px-1 text-sm focus:outline-none"
           phx-update="replace"
         >
           <%= for {{suggestion_name, suggestion_id}, index} <- Enum.with_index(@suggestions) do %>
@@ -220,14 +233,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
               phx-value-name={suggestion_name}
               phx-target={@myself}
             >
-              <% escaped_term = Regex.escape(@search_term) %>
-              <% suggestion_name =
-                suggestion_name
-                |> to_string()
-                |> Phoenix.HTML.html_escape()
-                |> Phoenix.HTML.safe_to_string()
-                |> String.replace(~r/(#{escaped_term})/i, "<b>\\0</b>") %>
-              {Phoenix.HTML.raw(suggestion_name)}
+              {highlight(suggestion_name, @search_term)}
             </li>
           <% end %>
         </ul>
@@ -244,6 +250,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
         socket
       ) do
     cond do
+      key == "ArrowDown" and socket.assigns.suggestions == [] ->
+        open(socket)
+
       key == "ArrowDown" and Enum.any?(socket.assigns.suggestions) ->
         new_index =
           min(socket.assigns.highlighted_index + 1, Enum.count(socket.assigns.suggestions) - 1)
@@ -337,8 +346,51 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
      )}
   end
 
+  # Open the list with the first options, like a select, when the input is
+  # clicked. The user can then type to filter it.
+  def handle_event("open", _, socket) do
+    if socket.assigns.suggestions == [], do: open(socket), else: {:noreply, socket}
+  end
+
+  def handle_event("close", _, socket) do
+    {:noreply, assign(socket, suggestions: [], highlighted_index: -1)}
+  end
+
   def handle_event("clear", _, socket) do
-    {:noreply, assign(socket, search_term: "", current_label: "")}
+    {:noreply,
+     assign(socket,
+       search_term: "",
+       current_label: "",
+       selected_id: nil,
+       suggestions: [],
+       highlighted_index: -1
+     )}
+  end
+
+  defp open(socket) do
+    case fetch_suggestions(socket.assigns, "") do
+      {:ok, suggestions} ->
+        {:noreply,
+         assign(socket, suggestions: suggestions, search_term: "", highlighted_index: -1)}
+
+      {:error, error} ->
+        {:noreply,
+         assign(socket,
+           suggestions: [],
+           errors: [error_message(error, socket.assigns.resource, "load")]
+         )}
+    end
+  end
+
+  defp highlight(name, search_term) do
+    escaped = name |> to_string() |> Phoenix.HTML.html_escape() |> Phoenix.HTML.safe_to_string()
+
+    if search_term == "" do
+      Phoenix.HTML.raw(escaped)
+    else
+      term = Regex.escape(search_term)
+      Phoenix.HTML.raw(String.replace(escaped, ~r/(#{term})/i, "<b>\\0</b>"))
+    end
   end
 
   # When the option list could not be loaded, fall back to the typeahead so the
@@ -370,8 +422,17 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     end
   end
 
-  defp fetch_suggestions(_assigns, "") do
-    {:ok, []}
+  # An empty term lists the first records, so the field opens like a select.
+  defp fetch_suggestions(assigns, "") do
+    assigns.resource
+    |> Ash.Query.new()
+    |> Ash.Query.load([assigns.pk_field, assigns.label_field])
+    |> Ash.Query.limit(assigns.max_items)
+    |> Ash.read(ash_opts(assigns))
+    |> case do
+      {:ok, results} -> {:ok, to_options(results, assigns.pk_field, assigns.label_field)}
+      {:error, error} -> {:error, error}
+    end
   end
 
   defp fetch_suggestions(assigns, search_term) do

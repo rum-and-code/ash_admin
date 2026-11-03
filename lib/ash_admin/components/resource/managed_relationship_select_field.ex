@@ -72,7 +72,7 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
       <div
         :if={@field_type == :typeahead}
         id={@id}
-        class="autocomplete-combobox"
+        class="autocomplete-combobox relative"
         role="combobox"
         aria-haspopup="listbox"
         aria-owns={"#{@id}-listbox"}
@@ -97,7 +97,7 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
           :if={Enum.count(@suggestions) > 0}
           id={"#{@id}-listbox"}
           role="listbox"
-          class="aa-menu absolute mt-1 overflow-auto px-1 text-sm focus:outline-none"
+          class="aa-menu absolute inset-x-0 top-full mt-1 max-h-60 overflow-auto px-1 text-sm focus:outline-none"
         >
           <%= for {{suggestion_name, suggestion_id}, index} <- Enum.with_index(@suggestions) do %>
             <li
