@@ -110,6 +110,28 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   {render_field_value(record, field_name, assigns)}
                 </:col>
 
+                <!--
+                  Our own controls layout. Cinder's default one wraps the filters in
+                  "<id>-filter-body", the same id as the filter of a column named "body".
+                -->
+                <:controls :let={controls}>
+                  <div class={controls.theme.filter_inputs_class}>
+                    <Cinder.Controls.render_search
+                      search={controls.search}
+                      theme={controls.theme}
+                      target={controls.target}
+                    />
+                    <Cinder.Controls.render_filter
+                      :for={{_name, filter} <- controls.filters}
+                      filter={filter}
+                      theme={controls.theme}
+                      target={controls.target}
+                      filter_values={controls.filter_values}
+                      raw_filter_params={controls.raw_filter_params}
+                    />
+                  </div>
+                </:controls>
+
                 <!-- Row actions menu -->
                 <:col :let={record} :if={actions?(@resource)} label="">
                   <.row_menu
