@@ -27,6 +27,7 @@ defmodule Demo.Tickets.Ticket do
 
     form do
       field :description, type: :markdown
+      field :organization_id, resource: Demo.Tickets.Organization
 
       field :photo do
         max_file_size 12_000_000
