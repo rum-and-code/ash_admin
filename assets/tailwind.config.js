@@ -7,6 +7,7 @@
 // https://tailwindcss.com/docs/configuration
 
 const plugin = require("tailwindcss/plugin");
+const colors = require("tailwindcss/colors");
 const fs = require("fs");
 const path = require("path");
 
@@ -24,6 +25,8 @@ module.exports = {
     extend: {
       colors: {
         brand: "#FD4F00",
+        // Accent for active nav items, primary buttons, current page and focus.
+        primary: colors.blue,
       },
     },
   },

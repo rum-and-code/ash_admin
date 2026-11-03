@@ -32,16 +32,16 @@ defmodule AshAdmin.Components.Resource.Table do
     ~H"""
     <div>
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
-        <thead class="text-left border-b-2 border-slate-200 dark:border-slate-700">
+        <thead class="text-left border-b border-slate-200 dark:border-white/10">
           <th
             :for={attribute <- attributes(@resource, @attributes, @skip)}
-            class="py-2 pr-2 text-sm font-semibold text-slate-900 dark:text-slate-100"
+            class="px-3 py-3 first:pl-0 text-sm font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap"
           >
             {to_name(attribute.name)}
           </th>
         </thead>
         <tbody>
-          <tr :for={record <- @data} class="border-b border-slate-200 dark:border-slate-700">
+          <tr :for={record <- @data} class="border-b border-slate-200 dark:border-white/10">
             <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">
               {render_attribute(
                 @domain,
