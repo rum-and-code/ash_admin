@@ -5,6 +5,7 @@
 # Copied/edited from phoenix_live_dashboard
 # Configures the endpoint
 Application.put_env(:ash_admin, DemoWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",
   live_view: [signing_salt: "hMegieSe"],

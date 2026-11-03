@@ -319,6 +319,14 @@ Hooks.Tenant = {
   },
 };
 
+Hooks.SidebarState = {
+  mounted() {
+    this.handleEvent("set_expanded_domains", (payload) => {
+      setCookie("sidebar_expanded_domains", JSON.stringify(payload.domains));
+    });
+  },
+};
+
 Hooks.PositionAbove = {
   mounted() { this.position(); },
   updated() { this.position(); },
@@ -453,6 +461,7 @@ let params = () => {
     actor_domain: getCookie("actor_domain"),
     actor_authorizing: getCookie("actor_authorizing"),
     actor_paused: getCookie("actor_paused"),
+    sidebar_expanded_domains: getCookie("sidebar_expanded_domains"),
   };
 };
 

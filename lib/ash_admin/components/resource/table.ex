@@ -32,16 +32,16 @@ defmodule AshAdmin.Components.Resource.Table do
     ~H"""
     <div>
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
-        <thead class="text-left border-b border-slate-200 dark:border-white/10">
+        <thead class="text-left border-b border-neutral-200 dark:border-white/10">
           <th
             :for={attribute <- attributes(@resource, @attributes, @skip)}
-            class="px-3 py-3 first:pl-0 text-sm font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap"
+            class="px-3 py-3 first:pl-0 text-sm font-semibold text-neutral-900 dark:text-neutral-100 whitespace-nowrap"
           >
             {to_name(attribute.name)}
           </th>
         </thead>
         <tbody>
-          <tr :for={record <- @data} class="border-b border-slate-200 dark:border-white/10">
+          <tr :for={record <- @data} class="border-b border-neutral-200 dark:border-white/10">
             <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">
               {render_attribute(
                 @domain,
@@ -67,7 +67,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   }>
                     <.icon
                       name="hero-information-circle-solid"
-                      class="h-5 w-5 text-slate-500 dark:text-slate-400"
+                      class="h-5 w-5 text-neutral-500 dark:text-neutral-400"
                     />
                   </.link>
                 </div>
@@ -84,7 +84,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   }>
                     <.icon
                       name="hero-pencil-solid"
-                      class="h-5 w-5 text-slate-500 dark:text-slate-400"
+                      class="h-5 w-5 text-neutral-500 dark:text-neutral-400"
                     />
                   </.link>
                 </div>
@@ -101,7 +101,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   }>
                     <.icon
                       name="hero-x-circle-solid"
-                      class="h-5 w-5 text-slate-500 dark:text-slate-400"
+                      class="h-5 w-5 text-neutral-500 dark:text-neutral-400"
                     />
                   </.link>
                 </div>
@@ -113,7 +113,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   phx-value-domain={AshAdmin.Domain.name(@domain)}
                   phx-value-pkey={encode_primary_key(record)}
                 >
-                  <.icon name="hero-key-solid" class="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                  <.icon name="hero-key-solid" class="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
                 </button>
               </div>
             </td>
