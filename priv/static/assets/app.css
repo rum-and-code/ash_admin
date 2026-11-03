@@ -1488,10 +1488,10 @@ select {
   height: 1.25rem;
 }
 
-.hero-exclamation-circle-mini {
-  --hero-exclamation-circle-mini: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>');
-  -webkit-mask: var(--hero-exclamation-circle-mini);
-  mask: var(--hero-exclamation-circle-mini);
+.hero-ellipsis-vertical {
+  --hero-ellipsis-vertical: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg>');
+  -webkit-mask: var(--hero-ellipsis-vertical);
+  mask: var(--hero-ellipsis-vertical);
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
   background-color: currentColor;
@@ -1501,10 +1501,10 @@ select {
   height: 1.25rem;
 }
 
-.hero-eye {
-  --hero-eye: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>');
-  -webkit-mask: var(--hero-eye);
-  mask: var(--hero-eye);
+.hero-exclamation-circle-mini {
+  --hero-exclamation-circle-mini: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>');
+  -webkit-mask: var(--hero-exclamation-circle-mini);
+  mask: var(--hero-exclamation-circle-mini);
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
   background-color: currentColor;
@@ -1644,19 +1644,6 @@ select {
   height: 1.25rem;
 }
 
-.hero-pencil {
-  --hero-pencil: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/></svg>');
-  -webkit-mask: var(--hero-pencil);
-  mask: var(--hero-pencil);
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  background-color: currentColor;
-  vertical-align: middle;
-  display: inline-block;
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
 .hero-pencil-solid {
   --hero-pencil-solid: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"/></svg>');
   -webkit-mask: var(--hero-pencil-solid);
@@ -1687,19 +1674,6 @@ select {
   --hero-plus-mini: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">  <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>');
   -webkit-mask: var(--hero-plus-mini);
   mask: var(--hero-plus-mini);
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  background-color: currentColor;
-  vertical-align: middle;
-  display: inline-block;
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.hero-trash {
-  --hero-trash: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>');
-  -webkit-mask: var(--hero-trash);
-  mask: var(--hero-trash);
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
   background-color: currentColor;
@@ -1977,6 +1951,11 @@ select {
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
+}
+
+.my-1 {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .my-4 {
@@ -3109,6 +3088,11 @@ select {
   background-color: rgb(255 241 242 / var(--tw-bg-opacity));
 }
 
+.bg-rose-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(225 29 72 / var(--tw-bg-opacity));
+}
+
 .bg-slate-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(241 245 249 / var(--tw-bg-opacity));
@@ -4138,6 +4122,11 @@ select {
   --tw-ring-color: rgb(226 232 240 / var(--tw-ring-opacity));
 }
 
+.ring-slate-300 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(203 213 225 / var(--tw-ring-opacity));
+}
+
 .ring-zinc-700\/10 {
   --tw-ring-color: rgb(63 63 70 / 0.1);
 }
@@ -4729,6 +4718,11 @@ main.admin-main::after {
   background-color: rgb(255 241 242 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-rose-500:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 63 94 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-slate-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(241 245 249 / var(--tw-bg-opacity));
@@ -4793,11 +4787,6 @@ main.admin-main::after {
   --tw-gradient-to: rgb(131 24 67 / 0.5) var(--tw-gradient-to-position);
 }
 
-.hover\:text-amber-500:hover {
-  --tw-text-opacity: 1;
-  color: rgb(245 158 11 / var(--tw-text-opacity));
-}
-
 .hover\:text-blue-700:hover {
   --tw-text-opacity: 1;
   color: rgb(29 78 216 / var(--tw-text-opacity));
@@ -4841,11 +4830,6 @@ main.admin-main::after {
 .hover\:text-red-500:hover {
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
-}
-
-.hover\:text-rose-500:hover {
-  --tw-text-opacity: 1;
-  color: rgb(244 63 94 / var(--tw-text-opacity));
 }
 
 .hover\:text-slate-300:hover {
@@ -5077,6 +5061,11 @@ main.admin-main::after {
 .focus\:ring-red-300:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(252 165 165 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-rose-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(244 63 94 / var(--tw-ring-opacity));
 }
 
 .focus\:ring-slate-500:focus {
@@ -5436,16 +5425,6 @@ main.admin-main::after {
   .dark\:hover\:bg-slate-800:hover {
     --tw-bg-opacity: 1;
     background-color: rgb(30 41 59 / var(--tw-bg-opacity));
-  }
-
-  .dark\:hover\:text-amber-400:hover {
-    --tw-text-opacity: 1;
-    color: rgb(251 191 36 / var(--tw-text-opacity));
-  }
-
-  .dark\:hover\:text-rose-400:hover {
-    --tw-text-opacity: 1;
-    color: rgb(251 113 133 / var(--tw-text-opacity));
   }
 
   .dark\:hover\:text-slate-200:hover {

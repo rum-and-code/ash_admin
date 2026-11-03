@@ -155,7 +155,7 @@ defmodule AshAdmin.Test.PageLiveTest do
       })
     end
 
-    test "clicking the key in the data table sets the record as the actor", %{
+    test "the row menu in the data table sets the record as the actor", %{
       conn: conn,
       post: post
     } do
@@ -165,7 +165,7 @@ defmodule AshAdmin.Test.PageLiveTest do
         live(conn, "/api/admin?domain=Domain&resource=Post&action_type=read")
 
       view
-      |> element("button[phx-click=set_actor][phx-value-pkey=\"#{pkey}\"]")
+      |> element(~s([id="row-menu-#{pkey}"] button), "Set as actor")
       |> render_click()
 
       domain_name = AshAdmin.Domain.name(AshAdmin.Test.Domain)
@@ -181,15 +181,15 @@ defmodule AshAdmin.Test.PageLiveTest do
   describe "page header" do
     @crumb "main nav[aria-label=Breadcrumb]"
 
-    test "the read page shows the resource and the read action, without the top bar",
+    test "the list page shows the plural resource, the list and the create button",
          %{conn: conn} do
       {:ok, view, _html} =
         live(conn, "/api/admin?domain=Test&resource=Post&action_type=read")
 
       refute has_element?(view, "header")
       assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
-      assert has_element?(view, "#{@crumb} li:last-child span", "Read")
-      assert has_element?(view, "main h1", "Post")
+      assert has_element?(view, "#{@crumb} li:last-child span", "List")
+      assert has_element?(view, "main h1", "Posts")
       assert has_element?(view, "main a, main button", "New")
       # A single read action needs no switcher: the breadcrumb links to the list.
       refute has_element?(view, "main a", ~r/^\s*Read\s*$/)
@@ -201,9 +201,12 @@ defmodule AshAdmin.Test.PageLiveTest do
 
       assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
       assert has_element?(view, "#{@crumb} li:last-child span", "Create")
+      assert has_element?(view, "main h1", "Create Post")
+      assert has_element?(view, "#form a", "Cancel")
     end
 
-    test "a record page shows the resource and the record id", %{conn: conn} do
+    test "the show page shows the resource and an update button, without the id",
+         %{conn: conn} do
       post =
         AshAdmin.Test.Post
         |> Ash.Changeset.for_create(:create, %{body: "crumb post"})
@@ -215,10 +218,40 @@ defmodule AshAdmin.Test.PageLiveTest do
         live(conn, "/api/admin?domain=Test&resource=Post&action_type=read&primary_key=#{pkey}")
 
       assert has_element?(view, "#{@crumb} li:first-child a", "Posts")
-      assert has_element?(view, "#{@crumb} li:last-child span", to_string(post.id))
+      assert has_element?(view, "#{@crumb} li:last-child span", "Show")
+      refute has_element?(view, @crumb, to_string(post.id))
+      assert has_element?(view, "main h1", "Show Post")
+      # Post has no update action, so no update button.
+      refute has_element?(view, "main a[href*='action_type=update']")
+      refute has_element?(view, "main a", "New")
     end
 
-    test "an update page links back to the record", %{conn: conn} do
+    test "the show page links to update when the resource has an update action",
+         %{conn: conn} do
+      profile =
+        AshAdmin.Test.Profile
+        |> Ash.Changeset.for_create(:create, %{name: "show profile"})
+        |> Ash.create!()
+
+      domain = AshAdmin.Domain.name(AshAdmin.Test.ManyToManyDomain)
+      pkey = AshAdmin.Helpers.encode_primary_key(profile)
+
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/api/admin?domain=#{domain}&resource=Profile&action_type=read&primary_key=#{pkey}"
+        )
+
+      assert has_element?(
+               view,
+               "main a[href*='action_type=update'][href*='primary_key=#{pkey}']",
+               "Update"
+             )
+
+      refute has_element?(view, "main a[href*='action_type=destroy']")
+    end
+
+    test "the update page links back to the record and to destroy", %{conn: conn} do
       profile =
         AshAdmin.Test.Profile
         |> Ash.Changeset.for_create(:create, %{name: "crumb profile"})
@@ -234,8 +267,18 @@ defmodule AshAdmin.Test.PageLiveTest do
         )
 
       assert has_element?(view, "#{@crumb} li:first-child a", "Profiles")
-      assert has_element?(view, "#{@crumb} li:nth-child(2) a", to_string(profile.id))
       assert has_element?(view, "#{@crumb} li:last-child span", "Update")
+      refute has_element?(view, @crumb, to_string(profile.id))
+
+      assert has_element?(
+               view,
+               "main a[href*='primary_key=#{pkey}'][href*='action_type=read']",
+               "Show"
+             )
+
+      assert has_element?(view, "main a[href*='action_type=destroy']", "Destroy")
+      assert has_element?(view, "#form button[type=submit]", "Save changes")
+      assert has_element?(view, "#form a", "Cancel")
     end
   end
 

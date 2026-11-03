@@ -31,6 +31,11 @@ defmodule AshAdmin.Resource do
         type: :string,
         doc: "The proper name to use when this resource appears in the admin interface."
       ],
+      plural_name: [
+        type: :string,
+        doc:
+          "The plural name to use in the navigation and on list pages. Defaults to the resource's `plural_name`, or to a simple English plural of `name`."
+      ],
       actor_load: [
         type: :any,
         doc: "A load statement to apply on the actor when fetching it"
@@ -197,6 +202,36 @@ defmodule AshAdmin.Resource do
 
       v ->
         v
+    end
+  end
+
+  @doc """
+  The plural name of the resource, used in the navigation and on list pages.
+
+  Uses the admin `plural_name`, then the resource's `plural_name` (when the
+  admin `name` is not set), then a simple English plural of `name/1`.
+  """
+  def plural_name(resource) do
+    admin_name = Spark.Dsl.Extension.get_opt(resource, [:admin], :name, nil, true)
+
+    case Spark.Dsl.Extension.get_opt(resource, [:admin], :plural_name, nil, true) do
+      nil ->
+        case {admin_name, Ash.Resource.Info.plural_name(resource)} do
+          {nil, plural} when not is_nil(plural) -> Macro.camelize(to_string(plural))
+          _ -> pluralize(name(resource))
+        end
+
+      plural ->
+        plural
+    end
+  end
+
+  # "User" -> "Users", "Category" -> "Categories", "Address" -> "Addresses".
+  defp pluralize(name) do
+    cond do
+      Regex.match?(~r/[^aeiou]y$/i, name) -> String.slice(name, 0..-2//1) <> "ies"
+      Regex.match?(~r/(s|x|z|ch|sh)$/i, name) -> name <> "es"
+      true -> name <> "s"
     end
   end
 

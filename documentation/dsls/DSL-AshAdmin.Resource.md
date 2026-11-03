@@ -22,6 +22,7 @@ Configure the admin dashboard for a given resource.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`name`](#admin-name){: #admin-name } | `String.t` |  | The proper name to use when this resource appears in the admin interface. |
+| [`plural_name`](#admin-plural_name){: #admin-plural_name } | `String.t` |  | The plural name to use in the navigation and on list pages. Defaults to the resource's `plural_name`, or to a simple English plural of `name`. |
 | [`actor_load`](#admin-actor_load){: #admin-actor_load } | `any` |  | A load statement to apply on the actor when fetching it |
 | [`actor?`](#admin-actor?){: #admin-actor? } | `boolean` |  | Whether or not this resource can be used as the actor for requests. |
 | [`show_action`](#admin-show_action){: #admin-show_action } | `atom` |  | The action to use when linking to the resource/viewing a single record. Defaults to the primary read action. |
