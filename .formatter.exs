@@ -5,6 +5,8 @@
 
 spark_locals_without_parens = [
   accepted_extensions: 1,
+  action: 1,
+  action: 2,
   actor?: 1,
   actor_load: 1,
   create_actions: 1,
@@ -22,6 +24,7 @@ spark_locals_without_parens = [
   read_actions: 1,
   relationship_display_fields: 1,
   relationship_select_max_items: 1,
+  resource: 1,
   resource_group: 1,
   resource_group_labels: 1,
   show?: 1,

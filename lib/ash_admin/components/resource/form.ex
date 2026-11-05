@@ -977,7 +977,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp short_text?(resource, attribute) do
-    case AshAdmin.Resource.field(resource, attribute.name) do
+    case admin_field(resource, attribute) do
       %{type: :short_text} ->
         true
 
@@ -987,7 +987,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp long_text?(resource, attribute) do
-    case AshAdmin.Resource.field(resource, attribute.name) do
+    case admin_field(resource, attribute) do
       %{type: :long_text} ->
         true
 
@@ -997,7 +997,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp markdown?(resource, attribute) do
-    case AshAdmin.Resource.field(resource, attribute.name) do
+    case admin_field(resource, attribute) do
       %{type: :markdown} ->
         true
 
@@ -1007,13 +1007,28 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp datetime_step(resource, attribute) do
-    case AshAdmin.Resource.field(resource, attribute.name) do
+    case admin_field(resource, attribute) do
       %{datetime_step: datetime_step} ->
         datetime_step
 
       _ ->
         "60"
     end
+  end
+
+  # The field configuration attached by `attributes/3` for the current action,
+  # or the form-level field for attributes rendered outside of it.
+  defp admin_field(resource, attribute) do
+    case Map.fetch(attribute, :admin_field) do
+      {:ok, field} -> field
+      :error -> AshAdmin.Resource.field(resource, attribute.name)
+    end
+  end
+
+  defp put_admin_fields(attributes, resource, action) do
+    Enum.map(attributes, fn attribute ->
+      Map.put(attribute, :admin_field, AshAdmin.Resource.field(resource, attribute.name, action))
+    end)
   end
 
   defp unwrap_type({:array, type}), do: unwrap_type(type)
@@ -2595,19 +2610,22 @@ defmodule AshAdmin.Components.Resource.Form do
     |> relate_attributes(resource)
   end
 
-  def attributes(resource, %{type: :read, arguments: arguments}, exactly)
+  def attributes(resource, %{type: :read, arguments: arguments} = action, exactly)
       when not is_nil(exactly) do
     resource
     |> Ash.Resource.Info.attributes()
     |> Enum.map(&Map.put(&1, :default, nil))
     |> Enum.concat(arguments)
     |> Enum.filter(&(&1.name in exactly))
+    |> put_admin_fields(resource, action)
     |> sort_attributes(resource)
     |> relate_attributes(resource)
   end
 
-  def attributes(resource, %{type: :read, arguments: arguments}, _) do
-    sort_attributes(arguments, resource)
+  def attributes(resource, %{type: :read, arguments: arguments} = action, _) do
+    arguments
+    |> put_admin_fields(resource, action)
+    |> sort_attributes(resource)
     |> relate_attributes(resource)
   end
 
@@ -2630,6 +2648,7 @@ defmodule AshAdmin.Components.Resource.Form do
   def attributes(resource, %{type: :destroy} = action, _) do
     action.arguments
     |> Enum.filter(& &1.public?)
+    |> put_admin_fields(resource, action)
     |> sort_attributes(resource, action)
     |> relate_attributes(resource)
   end
@@ -2651,6 +2670,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     attributes
     |> Enum.concat(arguments)
+    |> put_admin_fields(resource, action)
     |> sort_attributes(resource, action)
     |> relate_attributes(resource)
   end
@@ -2743,6 +2763,15 @@ defmodule AshAdmin.Components.Resource.Form do
               %{destination: destination} -> Map.put(attribute, :related_resource, destination)
               _ -> attribute
             end
+          end
+
+        %Ash.Resource.Actions.Argument{} = argument ->
+          case admin_field(resource, argument) do
+            %{resource: destination} when not is_nil(destination) ->
+              Map.put(argument, :related_resource, destination)
+
+            _ ->
+              argument
           end
 
         attribute ->
@@ -2895,7 +2924,7 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Enum.map(fn argument ->
         %{
           upload_key: upload_key(form, argument),
-          field: AshAdmin.Resource.field(form.resource, argument.name)
+          field: AshAdmin.Resource.field(form.resource, argument.name, form.source.action)
         }
       end)
     end)

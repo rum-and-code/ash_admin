@@ -32,6 +32,12 @@ defmodule Demo.Tickets.Ticket do
         max_file_size 12_000_000
         accepted_extensions ["image/*"]
       end
+
+      # Scoped to :transfer. The :update action also has an `organization_id`
+      # argument, but it goes through manage_relationship.
+      action :transfer do
+        field :organization_id, resource: Demo.Tickets.Organization
+      end
     end
   end
 
@@ -125,6 +131,18 @@ defmodule Demo.Tickets.Ticket do
       change {Dev.Changes.RecordFilePath, file_attribute: :photo, path_attribute: :photo_path}
       change manage_relationship(:organization_id, :organization, type: :append_and_remove)
       change manage_relationship(:comments, :comments, type: :direct_control)
+    end
+
+    # `organization_id` has `resource: Demo.Tickets.Organization` in the
+    # `action :transfer` block of the admin form section, so it renders as a
+    # relationship select, not a UUID input.
+    update :transfer do
+      description "Move the ticket to another organization."
+      accept []
+      require_atomic? false
+      argument :organization_id, :uuid, allow_nil?: false
+
+      change set_attribute(:organization_id, arg(:organization_id))
     end
 
     update :assign do
